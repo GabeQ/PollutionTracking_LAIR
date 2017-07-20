@@ -35,6 +35,23 @@ def make_grid_from_graph(graph):
 	origin = (rounddown(left) - 100, rounddown(bottom) - 100)
 	return Grid2D(int(numCol), int(numRow), cellSize, origin)
 
+def pollutionTracking_sim(graph, grid, routeList, updateDist = None):
+	'''Takes in a graph with pollution measurements, a corresponding grid,
+	and a route to update the grid with pollution estimates using the pollution
+	measurements on the graph nodes as actual pollution values.'''
+	for route in routeList:
+		for n in route:
+			pollution = graph.node[n]['pollution_amount']
+			xCoord = graph.node[n]['cartesian_coords'][0]
+			yCoord = graph.node[n]['cartesian_coords'][1]
+
+			if updateDist:
+				grid.update_nearby_cells(pollution, xCoord, yCoord, updateDist)
+			else:
+				grid.update_all_cells(pollution, xCoord, yCoord)
+
+	grid_pollution_surf_plotly(grid)
+
 
 
 

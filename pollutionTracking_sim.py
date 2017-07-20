@@ -1,5 +1,6 @@
-#pollutionTracking_sim.py
-#Gabriel Quiroz
+#!/usr/bin/env python
+
+'''Script that sets up variables for pollution tracking simulation'''
 
 
 import osmnx as ox, networkx as nx, matplotlib.cm as cm, pandas as pd, numpy as np, plotly.plotly as py, plotly.graph_objs as go
@@ -44,22 +45,3 @@ path4 = nx.shortest_path(testGraph, point4, start, weight = 'length')
 pathList = [path1, path2, path3, path4]
 polList = [testGraph.node[n]['pollution_amount'] for n in testGraph.nodes()]
 maxPolNode = testGraph.nodes()[polList.index(max(polList))]
-
-
-
-def pollutionTracking_sim(graph, grid, routeList, updateDist = None):
-	'''Takes in a graph with pollution measurements, a corresponding grid,
-	and a route to update the grid with pollution estimates using the pollution
-	measurements on the graph nodes as actual pollution values.'''
-	for route in routeList:
-		for n in route:
-			pollution = graph.node[n]['pollution_amount']
-			xCoord = graph.node[n]['cartesian_coords'][0]
-			yCoord = graph.node[n]['cartesian_coords'][1]
-
-			if updateDist:
-				grid.update_nearby_cells(pollution, xCoord, yCoord, updateDist)
-			else:
-				grid.update_all_cells(pollution, xCoord, yCoord)
-
-	grid_pollution_surf_plotly(grid)
