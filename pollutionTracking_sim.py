@@ -2,6 +2,8 @@
 
 '''Script that sets up variables for pollution tracking simulation'''
 
+__author__ = "Gabriel Quiroz"
+__copyright__ = "Copyright 2017, LAIR Project"
 
 import osmnx as ox, networkx as nx, matplotlib.cm as cm, pandas as pd, numpy as np, plotly.plotly as py, plotly.graph_objs as go
 from haversine import haversine
@@ -13,6 +15,7 @@ from graphRouting import *
 from kalmanFiltering import *
 from graphandgrid import *
 from grid import *
+
 
 #Claremont Graph with route from mudd to super king
 Claremont = ox.graph_from_place('Claremont, CA', network_type = 'drive')
@@ -45,3 +48,4 @@ path4 = nx.shortest_path(testGraph, point4, start, weight = 'length')
 pathList = [path1, path2, path3, path4]
 polList = [testGraph.node[n]['pollution_amount'] for n in testGraph.nodes()]
 maxPolNode = testGraph.nodes()[polList.index(max(polList))]
+

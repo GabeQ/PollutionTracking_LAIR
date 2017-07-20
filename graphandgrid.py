@@ -1,18 +1,24 @@
-#graphandgrid.py
-#Gabriel Quiroz
-#Contains functions for analyzing both the 2D grid and the graph of road networks
+#!/usr/bin/env python
+
+'''graphandgrid.py: Contains functions for analyzing both the 2D grid and the graph of road networks together.'''
+
+__author__ = "Gabriel Quiroz"
+__copyright__ = "Copyright 2017, LAIR Project"
 
 import networkx as nx, math as m
 from pollutionMapping_LAIR import get_cart_coords
 from grid import *
 
+
 def roundup(x):
 	'''rounds a number up to the nearest hundred'''
 	return int(m.ceil(x/100.0))*100
 
+
 def rounddown(x):
 	'''rounds a number down to the nearest hundred'''
 	return int(m.floor(x/100.0))*100
+
 
 def make_grid_from_graph(graph):
 	'''Makes a grid with size specified from the graph's cartesian coordinates.'''
@@ -35,6 +41,7 @@ def make_grid_from_graph(graph):
 	origin = (rounddown(left) - 100, rounddown(bottom) - 100)
 	return Grid2D(int(numCol), int(numRow), cellSize, origin)
 
+
 def pollutionTracking_sim(graph, grid, routeList, updateDist = None):
 	'''Takes in a graph with pollution measurements, a corresponding grid,
 	and a route to update the grid with pollution estimates using the pollution
@@ -51,10 +58,4 @@ def pollutionTracking_sim(graph, grid, routeList, updateDist = None):
 				grid.update_all_cells(pollution, xCoord, yCoord)
 
 	grid_pollution_surf_plotly(grid)
-
-
-
-
-
-
 

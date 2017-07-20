@@ -1,6 +1,12 @@
-#graphRouting.py
-#Gabriel Quiroz 2017
+#!/usr/bin/env python
+
+'''graphRouting.py: Contains functions for displaying directions in terminal of a specific route in a graph'''
+
+__author__ = "Gabriel Quiroz"
+__copyright__ = "Copyright 2017, LAIR Project"
+
 from pollutionMapping_LAIR import nodeList_to_edgeList
+
 
 def graphRouting(graph, route):
 	'''Given a graph and a specific route of nodes, print directions to get from point A to point B'''
@@ -28,3 +34,4 @@ def graphRouting(graph, route):
 			xdir = 'WEST'
 
 		print('Go' +' '+ ydir + ' ' + xdir + ' ' + 'on' + ' ' + name)
+

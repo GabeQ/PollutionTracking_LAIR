@@ -1,9 +1,10 @@
-#kalmanFiltering.py
-#Gabriel Quiroz
-#cite http://scipy-cookbook.readthedocs.io/items/KalmanFiltering.html
+#!/usr/bin/env python
 
-from haversine import haversine
-import matplotlib.pyplot as plt
+'''kalmanFiltering.py: Contains functions to perform the Kalman Filter. Cite http://scipy-cookbook.readthedocs.io/items/KalmanFiltering.html'''
+
+__author__ = "Gabriel Quiroz"
+__copyright__ = "Copyright 2017, LAIR Project"
+
 
 def meas_var_dist(distance):
 	'''calculates the measured value variance for a given point given 
@@ -70,3 +71,4 @@ def kalman_filter_routing(graph, est, est_var, meas_var, startNode, num_cycl):
 			targetNode = n
 			
 	return nx.shortest_path(graph, startNode, targetNode, weight = 'length')
+

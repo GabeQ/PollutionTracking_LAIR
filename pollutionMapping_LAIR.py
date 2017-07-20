@@ -1,10 +1,12 @@
-# LAIR RESARCH SUMMER 2017
-# Created by Gabriel Quiroz
-# June 21, 2017
-# Cite to http://geoffboeing.com/2016/11/osmnx-python-street-networks/
+#!/usr/bin/env python
+
+'''pollutionMapping_LAIR.py: Contains basic functions for analyzing street network data from osmnx. 
+Cite to http://geoffboeing.com/2016/11/osmnx-python-street-networks/'''
+
+__author__ = "Gabriel Quiroz"
+__copyright__ = "Copyright 2017, LAIR Project"
 
 import osmnx as ox, networkx as nx, numpy as np
-
 earthRadius = 6.371e6
 
 
@@ -60,3 +62,4 @@ def nodeList_to_edgeList(nodeList):
 		edgeList.append((nodeList[i], nodeList[i+1],))
 
 	return edgeList
+

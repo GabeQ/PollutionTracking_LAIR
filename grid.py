@@ -1,8 +1,13 @@
-#grid.py
-#Gabriel Quiroz
+#!/usr/bin/env python
+
+'''grid.py: Contains the classes of grid and cells, as well as methods to analyze pollution data within a cell.'''
+
+__author__ = "Gabriel Quiroz"
+__copyright__ = "Copyright 2017, LAIR Project"
 
 from kalmanFiltering import meas_var_dist, kalman_filter
 import numpy as np
+
 
 class Cell:
 
@@ -14,8 +19,10 @@ class Cell:
 		self.polEstVar = 20
 		self.j = 0
 
+
 	def get_cell_ID(self):
 		return self.col, self.row
+
 
 	def update_cell_state(self, measVal, xPos, yPos):
 		'''Updates the parameters for the Kalman Filter'''
@@ -25,6 +32,7 @@ class Cell:
 		posteriEst, posteriEstVar = kalman_filter(self.polEst, self.polEstVar, measVal, measVar)
 		self.polEst = posteriEst
 		self.polEstVar = posteriEstVar
+
 
 	def cell_cost_function(self, alpha):
 		'''Cost function of cell for optimizing the path taken in planning a route'''
@@ -66,9 +74,11 @@ class Grid2D:
 		'''Sets a cell at the desired index of a grid'''
 		self.cells[col][row] = cell
 
+
 	def get_cell(self, col, row):
 		'''Gets a cell given a specific row and column'''
 		return self.cells[col][row]
+
 
 	def get_nearest_cell(self, xCoord, yCoord):
 		'''Given x-coordinates and y-coordinates, return the cell that the coordinate lies
@@ -80,6 +90,7 @@ class Grid2D:
 		yID = int(yDiv)
 		return self.get_cell(xID, yID)
 
+
 	def update_all_cells(self, measPolVal, xPos, yPos):
 		'''updates the polution estimate for all cells in the grid given the current position
 		and a measured pollution value'''
@@ -87,6 +98,7 @@ class Grid2D:
 			for j in range(self.numRow):
 				cell = self.get_cell(i, j)
 				cell.update_cell_state(measPolVal, xPos, yPos)
+
 
 	def update_nearby_cells(self, measPolVal, xPos, yPos, cellDistance = 2):
 		'''Updates the polution estimate for cells within the cell distance of the current location'''
@@ -112,6 +124,7 @@ class Grid2D:
 				cell = self.get_cell(i, j)
 				cell.update_cell_state(measPolVal, xPos, yPos)
 
+
 	def get_cell_with_polEst(self, greaterThan):
 		cellList = []
 		for col in range(self.numCol):
@@ -120,7 +133,4 @@ class Grid2D:
 				if cell.polEst > greaterThan:
 					cellList.append(cell)
 		return cellList
-
-
-
 

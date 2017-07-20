@@ -1,5 +1,9 @@
-#pollutionGraphing.py
-#Gabriel Quiroz
+#!/usr/bin/env python
+
+'''pollutionGraphing.py: Contains functions to graph pollution data, either with matplotlib or plotly'''
+
+__author__ = "Gabriel Quiroz"
+__copyright__ = "Copyright 2017, LAIR Project"
 
 from pollutionMapping_LAIR import get_long_lat_coords, get_cart_coords
 from grid import *
@@ -89,6 +93,7 @@ def graph_pollution_surf_plotly(graph):
 	fig = go.Figure(data=data)
 	py.plot(fig, filename='graph_pollution_data')
 
+
 def grid_pollution_surf_plotly(grid):
 	'''Takes a grid with pollution estimates in each cell and plots the estimates in a mesh plot'''
 	col = grid.numCol
@@ -99,6 +104,7 @@ def grid_pollution_surf_plotly(grid):
 
 	for xPos in range(col):
 		x.append(grid.cells[xPos][0].center[0])
+
 	for yPos in range(row):
 		y.append(grid.cells[0][yPos].center[1])
 
@@ -110,13 +116,8 @@ def grid_pollution_surf_plotly(grid):
 			polData.append(cell.polEst)
 
 		pollution.append(polData)
-	# print('X-coords: ' + str(x))
-	# print('Y-coords: ' + str(y))
-	# print('PolEst: ' + str(pollution))
+
 	data = [go.Surface(x = x, y = y, z = pollution)]
 	fig = go.Figure(data = data)
 	py.plot(fig, filename = 'grid_pollution_data')
-
-
-
 

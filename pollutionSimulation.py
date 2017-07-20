@@ -1,9 +1,13 @@
-#pollutionSim.py
-#Gabriel Quiroz
-#Functions to simulate and add pollution to graph
+#!/usr/bin/env python
+
+'''pollutionSimulation.py: Contains functions for setting up pollution parameters within a graph'''
+
+__author__ = "Gabriel Quiroz"
+__copyright__ = "Copyright 2017, LAIR Project"
 
 import networkx as nx, numpy as np
 from haversine import haversine
+
 
 def get_pollution_sources(graph):
 	'''Returns a list of nodes connected to motorways (aka freeways) which should be labeled as pollution sources'''
@@ -88,5 +92,4 @@ def transfer_graph_node_pollution(graph1, graph2):
 		pollutionDic.update({n: graph1.node[n]['pollution_amount']})
 
 	nx.set_node_attributes(graph2, 'pollution_amount', pollutionDic)
-
 
