@@ -92,7 +92,7 @@ class Grid2D:
 
 
 	def update_all_cells(self, measPolVal, xPos, yPos):
-		'''updates the polution estimate for all cells in the grid given the current position
+		'''Updates the polution estimate for all cells in the grid given the current position
 		and a measured pollution value'''
 		for i in range(self.numCol):
 			for j in range(self.numRow):
@@ -126,6 +126,7 @@ class Grid2D:
 
 
 	def get_cell_with_polEst(self, greaterThan):
+		'''Returns a list of cells with pollution estimates greater than the selected value'''
 		cellList = []
 		for col in range(self.numCol):
 			for row in range(self.numRow):
