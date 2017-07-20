@@ -8,12 +8,12 @@ __copyright__ = "Copyright 2017, LAIR Project"
 import osmnx as ox, networkx as nx, matplotlib.cm as cm, pandas as pd, numpy as np, plotly.plotly as py, plotly.graph_objs as go
 from haversine import haversine
 
-from pollutionMapping_LAIR import *
+from streetNetworkGraphing import *
 from pollutionSimulation import *
 from pollutionGraphing import *
 from graphRouting import *
 from kalmanFiltering import *
-from graphandgrid import *
+from graphAndGrid import *
 from grid import *
 
 

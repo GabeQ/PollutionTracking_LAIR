@@ -5,7 +5,7 @@
 __author__ = "Gabriel Quiroz"
 __copyright__ = "Copyright 2017, LAIR Project"
 
-from pollutionMapping_LAIR import get_long_lat_coords, get_cart_coords
+from streetNetworkGraphing import get_long_lat_coords, get_cart_coords
 from grid import *
 import osmnx as ox, matplotlib.cm as cm, plotly.plotly as py, plotly.graph_objs as go
 

@@ -5,7 +5,7 @@
 __author__ = "Gabriel Quiroz"
 __copyright__ = "Copyright 2017, LAIR Project"
 
-from pollutionMapping_LAIR import nodeList_to_edgeList
+from streetNetworkGraphing import nodeList_to_edgeList
 
 
 def graphRouting(graph, route):

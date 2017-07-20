@@ -6,7 +6,7 @@ __author__ = "Gabriel Quiroz"
 __copyright__ = "Copyright 2017, LAIR Project"
 
 import networkx as nx, math as m
-from pollutionMapping_LAIR import get_cart_coords
+from streetNetworkGraphing import get_cart_coords
 from grid import *
 
 
