@@ -34,7 +34,7 @@ class Cell:
 		self.polEstVar = posteriEstVar
 
 
-	def cell_cost_function(self, alpha):
+	def cell_objective_function(self, alpha):
 		'''Cost function of cell for optimizing the path taken in planning a route'''
 		cost = alpha * self.polEstVar + (1 - alpha) * self.polEst
 		self.j = cost
@@ -51,6 +51,7 @@ class Grid2D:
 		self.numRow = numRow
 		self.cellSize = cellSize
 		self.origin = gridOrigin
+		self.JTotal = 0
 		colDist = gridOrigin[0]
 		colCells = []
 
@@ -80,7 +81,7 @@ class Grid2D:
 		return self.cells[col][row]
 
 
-	def get_nearest_cell(self, xCoord, yCoord):
+	def get_closest_cell(self, xCoord, yCoord):
 		'''Given x-coordinates and y-coordinates, return the cell that the coordinate lies
 		in. If the coordinate lies in the center of 4 cells, returns the upper right cell'''
 		xOrigin, yOrigin = self.origin
@@ -102,7 +103,7 @@ class Grid2D:
 
 	def update_nearby_cells(self, measPolVal, xPos, yPos, cellDistance = 2):
 		'''Updates the polution estimate for cells within the cell distance of the current location'''
-		closestCell = self.get_nearest_cell(xPos, yPos)
+		closestCell = self.get_closest_cell(xPos, yPos)
 		iCurrent, jCurrent = closestCell.get_cell_ID()
 		xStart = iCurrent - cellDistance
 		yStart = jCurrent - cellDistance
@@ -123,6 +124,14 @@ class Grid2D:
 			for j in range(yStart, yEnd):
 				cell = self.get_cell(i, j)
 				cell.update_cell_state(measPolVal, xPos, yPos)
+
+
+	def update_objective_fun(self, xPos, yPos, alpha):
+		'''updates a cell objective function given the current xPos and yPos within the grid'''
+		cell = self.get_closest_cell(xPos, yPos):
+		cell.update_objective_fun(alpha)
+		self.JTotal += cell.j
+
 
 
 	def get_cell_with_polEst(self, greaterThan):
