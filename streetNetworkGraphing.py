@@ -7,6 +7,7 @@ __author__ = "Gabriel Quiroz"
 __copyright__ = "Copyright 2017, LAIR Project"
 
 import osmnx as ox, networkx as nx, numpy as np
+from collections import defaultdict, deque
 earthRadius = 6.371e6
 
 
