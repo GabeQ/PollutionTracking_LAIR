@@ -128,7 +128,7 @@ class Grid2D:
 
 	def update_objective_fun(self, xPos, yPos, alpha):
 		'''updates a cell objective function given the current xPos and yPos within the grid'''
-		cell = self.get_closest_cell(xPos, yPos):
+		cell = self.get_closest_cell(xPos, yPos)
 		cell.update_objective_fun(alpha)
 		self.JTotal += cell.j
 
