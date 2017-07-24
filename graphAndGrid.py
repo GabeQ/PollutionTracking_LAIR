@@ -59,3 +59,51 @@ def pollutionTracking_sim(graph, grid, routeList, updateDist = None):
 
 	grid_pollution_surf_plotly(grid)
 
+
+def get_nodes_in_cell(graph, grid, cell):
+	'''Given a cell in a grid and the grid's corresponding graph, get all nodes whose
+	cartesian coordinates are within the cell'''
+	xMid, yMid = cell.center
+	length = grid.cellSize
+	left = xMid - (length/2)
+	right = xMid + (length/2)
+	bottom = yMid - (length/2)
+	top = yMid + (length/2)
+	nodeList = []
+
+	for n in graph.nodes():
+		x, y = graph.node[n]['cartesian_coords']
+		if left < x < right:
+			if bottom < y < top:
+				nodeList.append(n)
+
+	return nodeList
+
+def get_nodes_multiple_cells(graph, grid, cell, cellDist):
+	iCurrent, jCurrent = cell.get_cell_ID()
+	xStart = iCurrent - cellDist
+	yStart = jCurrent - cellDist
+	xEnd = iCurrent + cellDist + 1
+	yEnd = jCurrent + cellDist + 1
+	nodeList = []
+
+	if xStart < 0:
+		xStart = 0
+	if yStart < 0:
+		yStart = 0
+
+	if xEnd >= grid.numCol:
+		xEnd = grid.numCol
+	if yEnd >= grid.numRow:
+		yEnd = grid.numRow
+
+	for i in range(xStart, xEnd):
+		for j in range(yStart, yEnd):
+			cell = grid.get_cell(i, j)
+			nodeList += get_nodes_in_cell(graph, grid, cell)
+
+	return nodeList
+			
+
+
+
