@@ -145,7 +145,7 @@ class Grid2D:
 		return cellList
 
 
-	def cell_to_grid(self, cell, resolution = 5):
+	def cell_to_grid(self, cell, resolution):
 		'''Converts a cell into a grid for higher resolution to analyze data'''
 		xMid, yMid = cell.center
 		length = self.cellSize
@@ -158,7 +158,7 @@ class Grid2D:
 		self.set_cell(cell.col, cell.row, newGrid)
 
 
-	def update_resolution(self, xPos, yPos):
+	def update_resolution(self, xPos, yPos, resolution = 5):
 		'''updates the resolution of cells surrounding the xPos and yPos
 		as well as the cell containing the xPos and yPos'''
 		closestCell = self.get_closest_cell(xPos, yPos)
@@ -181,5 +181,5 @@ class Grid2D:
 		for i in range(xStart, xEnd):
 			for j in range(yStart, yEnd):
 				cell = self.get_cell(i, j)
-				self.cell_to_grid(cell) 
+				self.cell_to_grid(cell, resolution) 
 
