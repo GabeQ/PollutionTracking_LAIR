@@ -11,12 +11,12 @@ import numpy as np
 
 class Cell:
 
-	def __init__(self, col, row, midpoint):
+	def __init__(self, col, row, midpoint, polEst, polEstVar):
 		self.col = col
 		self.row = row
 		self.center = midpoint
-		self.polEst = 100
-		self.polEstVar = 20
+		self.polEst = polEst
+		self.polEstVar = polEstVar
 		self.j = 0
 
 
@@ -42,7 +42,7 @@ class Cell:
 
 class Grid2D:
 
-	def __init__(self, numCol, numRow, cellSize, gridOrigin = (0, 0)):
+	def __init__(self, numCol, numRow, cellSize, polEst = 100, polEstVar = 20, gridOrigin = (0, 0)):
 		'''Initializes a 2D Grid given the length (x) and width (y) of the
 		grid. The data parameter should be given as a 2D list. The length of
 		the main list should be size X and the lenght of each list within the list
@@ -61,7 +61,7 @@ class Grid2D:
 
 			for row in range(numRow):
 				midpoint = (colDist + cellSize/2.0, rowDist + cellSize/2.0)
-				cell = Cell(col, row, midpoint)
+				cell = Cell(col, row, midpoint, polEst, polEstVar)
 				rowCells.append(cell)
 				rowDist += cellSize
 
@@ -71,7 +71,7 @@ class Grid2D:
 		self.cells = colCells
 
 
-	def set_cell(self, row, col, cell):
+	def set_cell(self, col, row, cell):
 		'''Sets a cell at the desired index of a grid'''
 		self.cells[col][row] = cell
 
@@ -107,8 +107,8 @@ class Grid2D:
 		iCurrent, jCurrent = closestCell.get_cell_ID()
 		xStart = iCurrent - cellDistance
 		yStart = jCurrent - cellDistance
-		xEnd = iCurrent + cellDistance
-		yEnd = jCurrent + cellDistance
+		xEnd = iCurrent + cellDistance + 1
+		yEnd = jCurrent + cellDistance + 1
 
 		if xStart < 0:
 			xStart = 0
@@ -143,4 +143,43 @@ class Grid2D:
 				if cell.polEst > greaterThan:
 					cellList.append(cell)
 		return cellList
+
+
+	def cell_to_grid(self, cell, resolution = 5):
+		'''Converts a cell into a grid for higher resolution to analyze data'''
+		xMid, yMid = cell.center
+		length = self.cellSize
+		xOrig = xMid - (length/2)
+		yOrig = yMid - (length/2)
+		newCellSize = length/resolution
+		polEst = cell.polEst
+		polEstVar = cell.polEstVar
+		newGrid = Grid2D(resolution, resolution, newCellSize, polEst, polEstVar, (xOrig, yOrig))
+		self.set_cell(cell.col, cell.row, newGrid)
+
+
+	def update_resolution(self, xPos, yPos):
+		'''updates the resolution of cells surrounding the xPos and yPos
+		as well as the cell containing the xPos and yPos'''
+		closestCell = self.get_closest_cell(xPos, yPos)
+		iCurrent, jCurrent = closestCell.get_cell_ID()
+		xStart = iCurrent - 1
+		yStart = jCurrent - 1
+		xEnd = iCurrent + 2
+		yEnd = jCurrent + 2
+
+		if xStart < 0:
+			xStart = 0
+		if yStart < 0:
+			yStart = 0
+
+		if xEnd >= self.numCol:
+			xEnd = self.numCol
+		if yEnd >= self.numRow:
+			yEnd = self.numRow
+
+		for i in range(xStart, xEnd):
+			for j in range(yStart, yEnd):
+				cell = self.get_cell(i, j)
+				self.cell_to_grid(cell) 
 
