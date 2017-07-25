@@ -26,7 +26,7 @@ add_pollution_all_nodes(Claremont, pollutionSources, osmID = True)
 mudd = ox.get_nearest_node(Claremont, (34.1061, -117.7105))
 king = ox.get_nearest_node(Claremont, (34.080117, -117.721439))
 route = nx.shortest_path(Claremont, mudd, king, weight = 'length')
-Claremont_grid = make_grid_from_graph(Claremont)
+Claremont_grid = make_grid_from_graph(Claremont, 100)
 
 
 '''Global Variables for small tests on BBOX'''
@@ -34,7 +34,7 @@ center = (34.107089, -117.720289)
 testGraph = ox.graph_from_point(center, distance = 1000, network_type = 'drive')
 set_cart_coords(testGraph)
 transfer_graph_node_pollution(Claremont, testGraph)
-testGrid = make_grid_from_graph(testGraph)
+testGrid = make_grid_from_graph(testGraph, 100)
 #Nodes to create path
 start = ox.get_nearest_node(testGraph, (34.115018, -117.728304))
 point2 = ox.get_nearest_node(testGraph, (34.098927, -117.729273))
