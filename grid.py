@@ -20,6 +20,10 @@ class Cell:
 		self.j = 0
 
 
+	def __repr__(self):
+		return 'Cell(xCenter = %s, yCenter = %s)' % (self.center[0], self.center[1])
+
+
 	def get_cell_ID(self):
 		return self.col, self.row
 
@@ -69,6 +73,10 @@ class Grid2D:
 			colDist += cellSize
 
 		self.cells = colCells
+
+
+	def __repr__(self):
+		return 'Grid(xOrigin = %s, yOrigin = %s)' % (self.origin[0], self.origin[1])
 
 
 	def set_cell(self, col, row, cell):
@@ -152,14 +160,13 @@ class Grid2D:
 
 
 
-	def get_cell_with_polEst(self, greaterThan):
+	def cells_with_polEst_greaterThan(self, greaterThan, cellList = []):
 		'''Returns a list of cells with pollution estimates greater than the selected value'''
-		cellList = []
 		for col in range(self.numCol):
 			for row in range(self.numRow):
 				cell = self.get_cell(col, row)
 				if type(cell) == Grid2D: #If cell is actually another grid
-					cell.get_cell_with_polEst(greaterThan)
+					cell.cells_with_polEst_greaterThan(greaterThan, cellList)
 				else:
 					if cell.polEst > greaterThan:
 						cellList.append(cell)
