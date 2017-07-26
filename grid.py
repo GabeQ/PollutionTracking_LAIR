@@ -83,12 +83,18 @@ class Grid2D:
 
 	def get_closest_cell(self, xCoord, yCoord):
 		'''Given x-coordinates and y-coordinates, return the cell that the coordinate lies
-		in. If the coordinate lies in the center of 4 cells, returns the upper right cell'''
+		in. If the coordinate lies between cells, always returns the upper right cell. If the 
+		coordinate lies between the uppermost edge or the rightmost edge of the grid, returns 
+		the next cell either to the bottom or to the left of the coordinate.'''
 		xOrigin, yOrigin = self.origin
 		xDiv = (xCoord - xOrigin)/self.cellSize
 		yDiv = (yCoord - yOrigin)/self.cellSize
 		xID = int(xDiv)
 		yID = int(yDiv)
+		if xID == self.numCol:
+			xID -= 1
+		if yID == self.numRow:
+			yID -= 1
 		return self.get_cell(xID, yID)
 
 
@@ -128,6 +134,7 @@ class Grid2D:
 
 			for i in range(xStart, xEnd):
 				for j in range(yStart, yEnd):
+					cell = self.get_cell(i, j)
 					if type(cell) == Grid2D: #If the cell is actually another grid
 						cell.update_all_cells(measPolVal, xPos, yPos)
 					else:
