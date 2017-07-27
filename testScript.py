@@ -9,11 +9,11 @@ from graphAndGrid import *
 import networkx as nx
 
 G = nx.Graph()
-nodes = [0, 1, 2, 3, 4, 5]
-edges = [(0, 1), (0, 2), (0, 5), (1, 2), (1, 4), (2, 5), (2, 3), (3, 5), (3, 4)]
+nodes = [0, 1, 2, 3, 4, 5, 6]
+edges = [(0, 1), (0, 2), (0, 5), (1, 2), (1, 4), (1, 6), (2, 5), (2, 3), (3, 5), (3, 4), (4, 6)]
 G.add_nodes_from(nodes)
 G.add_edges_from(edges)
-cartCoords = [(-2, -3), (0, 0), (-4, -4), (-3, -2), (-2, -2), (-1, -3)]
+cartCoords = [(1, 1), (1, 3), (1.5, 1.5), (2, 2), (1, 1.5), (1.75, 1.25), (5, 5)]
 dic = {}
 for i in range(len(cartCoords)):
 	dic.update({nodes[i]: cartCoords[i]})
