@@ -11,10 +11,12 @@ import numpy as np
 
 class Cell:
 
-	def __init__(self, col, row, midpoint, polEst, polEstVar):
+	def __init__(self, col, row, midpoint, parent, depth, polEst, polEstVar):
 		self.col = col
 		self.row = row
 		self.center = midpoint
+		self.parent = parent
+		self.depth = depth
 		self.polEst = polEst
 		self.polEstVar = polEstVar
 		self.j = 0
@@ -25,7 +27,14 @@ class Cell:
 
 
 	def get_cell_ID(self):
+		'''Returns the column number and row number the column resides in
+		from its parent grid'''
 		return self.col, self.row
+
+
+	def get_parent(self):
+		'''Returns the parent grid that the cell belongs to.'''
+		return self.parent
 
 
 	def update_cell_state(self, measVal, xPos, yPos):
@@ -46,7 +55,7 @@ class Cell:
 
 class Grid2D:
 
-	def __init__(self, numCol, numRow, cellSize, polEst = 100, polEstVar = 20, gridOrigin = (0, 0)):
+	def __init__(self, numCol, numRow, cellSize, gridOrigin = (0, 0), parent = None, col = None, row = None, depth = 0, polEst = 100, polEstVar = 20):
 		'''Initializes a 2D Grid given the length (x) and width (y) of the
 		grid. The data parameter should be given as a 2D list. The length of
 		the main list should be size X and the lenght of each list within the list
@@ -55,6 +64,10 @@ class Grid2D:
 		self.numRow = numRow
 		self.cellSize = cellSize
 		self.origin = gridOrigin
+		self.parent = parent
+		self.col = col
+		self.row = row
+		self.depth = depth
 		self.JTotal = 0
 		colDist = gridOrigin[0]
 		colCells = []
@@ -65,7 +78,7 @@ class Grid2D:
 
 			for row in range(numRow):
 				midpoint = (colDist + cellSize/2.0, rowDist + cellSize/2.0)
-				cell = Cell(col, row, midpoint, polEst, polEstVar)
+				cell = Cell(col, row, midpoint, self, self.depth + 1, polEst, polEstVar)
 				rowCells.append(cell)
 				rowDist += cellSize
 
@@ -149,14 +162,14 @@ class Grid2D:
 						cell.update_cell_state(measPolVal, xPos, yPos)
 
 
-	def update_objective_fun(self, xPos, yPos, alpha):
-		'''updates a cell objective function given the current xPos and yPos within the grid'''
-		cell = self.get_closest_cell(xPos, yPos)
-		if type(cell) == Grid2D: #If cell is actually another grid
-			cell.update_objective_fun(xPos, yPos, alpha)
-		else:
-			cell.cell_objective_function(alpha)
-			self.JTotal += cell.j
+	# def update_objective_fun(self, xPos, yPos, alpha):
+	# 	'''updates a cell objective function given the current xPos and yPos within the grid'''
+	# 	cell = self.get_closest_cell(xPos, yPos)
+	# 	if type(cell) == Grid2D: #If cell is actually another grid
+	# 		cell.update_objective_fun(xPos, yPos, alpha)
+	# 	else:
+	# 		cell.cell_objective_function(alpha)
+	# 		self.JTotal += cell.j
 
 
 
@@ -182,7 +195,7 @@ class Grid2D:
 		newCellSize = length/resolution
 		polEst = cell.polEst
 		polEstVar = cell.polEstVar
-		newGrid = Grid2D(resolution, resolution, newCellSize, polEst, polEstVar, (xOrig, yOrig))
+		newGrid = Grid2D(resolution, resolution, newCellSize, (xOrig, yOrig), parent = self, col = cell.col, row = cell.row, depth = self.depth + 1, polEst = polEst, polEstVar = polEstVar)
 		self.set_cell(cell.col, cell.row, newGrid)
 
 
