@@ -6,7 +6,7 @@ __author__ = "Gabriel Quiroz"
 __copyright__ = "Copyright 2017, LAIR Project"
 
 from kalmanFiltering import meas_var_dist, kalman_filter
-import numpy as np
+import numpy as np, networkx as nx
 
 
 class Cell:
@@ -55,19 +55,17 @@ class Cell:
 
 class Grid2D:
 
-	def __init__(self, numCol, numRow, cellSize, gridOrigin = (0, 0), parent = None, col = None, row = None, depth = 0, polEst = 100, polEstVar = 20):
-		'''Initializes a 2D Grid given the length (x) and width (y) of the
-		grid. The data parameter should be given as a 2D list. The length of
-		the main list should be size X and the lenght of each list within the list
-		should be size Y. The grid origin is the bottom left most point of the grid.'''
+	def __init__(self, numCol, numRow, cellSize, gridOrigin = (0, 0), parent = None, depth = 0, polEst = 100, polEstVar = 20):
+		'''Initializes a 2D Grid given the length (x) and width (y) of the grid. The data parameter should be given as a 2D list.
+		The length of the main list should be size X and the lenght of each list within the list should be size Y. The grid
+		origin is the bottom left most point of the grid.'''
 		self.numCol = numCol
 		self.numRow = numRow
 		self.cellSize = cellSize
 		self.origin = gridOrigin
 		self.parent = parent
-		self.col = col
-		self.row = row
 		self.depth = depth
+		self.graph = nx.Graph()
 		self.JTotal = 0
 		colDist = gridOrigin[0]
 		colCells = []
@@ -80,6 +78,7 @@ class Grid2D:
 				midpoint = (colDist + cellSize/2.0, rowDist + cellSize/2.0)
 				cell = Cell(col, row, midpoint, self, self.depth + 1, polEst, polEstVar)
 				rowCells.append(cell)
+				self.graph.add_node(cell.center)
 				rowDist += cellSize
 
 			colCells.append(rowCells)
@@ -104,8 +103,8 @@ class Grid2D:
 
 	def get_closest_cell(self, xCoord, yCoord):
 		'''Given x-coordinates and y-coordinates, return the cell that the coordinate lies
-		in. If the coordinate lies between cells, always returns the upper right cell. If the 
-		coordinate lies between the uppermost edge or the rightmost edge of the grid, returns 
+		in. If the coordinate lies between cells, always returns the upper right cell. If the
+		coordinate lies between the uppermost edge or the rightmost edge of the grid, returns
 		the next cell either to the bottom or to the left of the coordinate.'''
 		xOrigin, yOrigin = self.origin
 		xDiv = (xCoord - xOrigin)/self.cellSize
@@ -119,6 +118,27 @@ class Grid2D:
 		return self.get_cell(xID, yID)
 
 
+	def connect_grid_graph_nodes(self):
+		'''Connects the nodes of the graph within the grid with their north, south, east, and west
+		neighbors'''
+		for col in range(self.numCol):
+			for row in range(1, self.numRow - 1):
+				print((col, row))
+				curPoint = self.get_cell(col, row).center
+				northPoint = self.get_cell(col, row + 1).center
+				southPoint = self.get_cell(col, row - 1).center
+				self.graph.add_edge(curPoint, northPoint)
+				self.graph.add_edge(curPoint, southPoint)
+
+		for row in range(self.numRow):
+			for col in range(1, self.numCol - 1):
+				curPoint = self.get_cell(col, row).center
+				eastPoint = self.get_cell(col + 1, row).center
+				westPoint = self.get_cell(col - 1, row).center
+				self.graph.add_edge(curPoint, eastPoint)
+				self.graph.add_edge(curPoint, westPoint)
+
+
 	def update_all_cells(self, measPolVal, xPos, yPos):
 		'''Updates the polution estimate for all cells in the grid given the current position
 		and a measured pollution value'''
@@ -127,7 +147,7 @@ class Grid2D:
 				cell = self.get_cell(i, j)
 				if type(cell) == Grid2D: #if the cell is actually another grid
 					cell.update_all_cells(measPolVal, xPos, yPos)
-				else: 
+				else:
 					cell.update_cell_state(measPolVal, xPos, yPos)
 
 
@@ -195,7 +215,9 @@ class Grid2D:
 		newCellSize = length/resolution
 		polEst = cell.polEst
 		polEstVar = cell.polEstVar
-		newGrid = Grid2D(resolution, resolution, newCellSize, (xOrig, yOrig), parent = self, col = cell.col, row = cell.row, depth = self.depth + 1, polEst = polEst, polEstVar = polEstVar)
+		newGrid = Grid2D(resolution, resolution, newCellSize, (xOrig, yOrig), parent = self, depth = self.depth + 1, polEst = polEst, polEstVar = polEstVar)
+		newGrid.connect_grid_graph_nodes()
+		self.graph.remove_node(cell.center)
 		self.set_cell(cell.col, cell.row, newGrid)
 
 
@@ -225,5 +247,4 @@ class Grid2D:
 			for i in range(xStart, xEnd):
 				for j in range(yStart, yEnd):
 					cell = self.get_cell(i, j)
-					self.cell_to_grid(cell, resolution) 
-
+					self.cell_to_grid(cell, resolution)
