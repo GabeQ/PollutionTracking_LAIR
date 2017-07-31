@@ -113,6 +113,42 @@ def get_nodes_multiple_cells(graph, grid, cell, cellDist):
 	return nodeList
 
 
+def connect_cells_between_grids(grid1, grid2):
+	'''Connects the cells between two grids that are next to each other and have
+	equal resolutions. Returns a graph of the two connected grids'''
+	graph = nx.compose(grid1.graph, grid2.graph)
+	origin1 = grid1.origin
+	origin2 = grid2.origin
+	delta = (origin2[0] - origin1[0], origin2[1] - origin1[1])
+	#Test to see if grids are actually next to each other
+	if delta[0] > grid1.cellSize*grid1.numCol or delta[1] > grid1.cellSize*grid1.numRow:
+		return "Grids are not next to each other"
+	elif delta[0] > 0 and delta[1] > 0:
+		return "Grids are diagonal to each other"
+	#Find out where grids reside using delta and connect cells together
+	elif delta[0] > 0:
+		for row in range(grid1.numRow):
+			cell1 = grid1.get_cell(grid1.numCol - 1, row)
+			cell2 = grid2.get_cell(0, row)
+			graph.add_edge(cell1.center, cell2.center)
+	elif delta[0] < 0:
+		for row in range(grid1.numRow):
+			cell1 = grid1.get_cell(0, row)
+			cell2 = grid2.get_cell(grid2.numCol - 1, row)
+			graph.add_edge(cell1.center, cell2.center)
+	elif delta[1] > 0:
+		for col in range(grid1.numCol):
+			cell1 = grid1.get_cell(col, grid1.numRow - 1)
+			cell2 = grid2.get_cell(col, 0)
+			graph.add_edge(cell1.center, cell2.center)
+	else:
+		for col in range(grid1.numCol):
+			cell1 = grid1.get_cell(col, 0)
+			cell2 = grid2.get_cell(col, grid2.numRow - 1)
+			graph.add_edge(cell1.center, cell2.center)
+	return graph
+
+
 def increase_grid_resolution(graph, grid, curNode):
 	cell = get_cell_from_node(graph, grid, curNode)
 	print(cell)
@@ -145,9 +181,3 @@ def increase_grid_resolution(graph, grid, curNode):
 # 			xCoord, yCoord = graph.node[node1]['cartesian_coords']
 # 			while len(get_nodes_in_cell(graph, grid, cell1)) > 1:
 # 				grid.update_resolution(xCoord, yCoord, resolution = 2)
-
-
-			
-
-
-
