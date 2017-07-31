@@ -122,21 +122,17 @@ class Grid2D:
 		'''Connects the nodes of the graph within the grid with their north, south, east, and west
 		neighbors'''
 		for col in range(self.numCol):
-			for row in range(1, self.numRow - 1):
+			for row in range(self.numRow - 1):
 				print((col, row))
 				curPoint = self.get_cell(col, row).center
 				northPoint = self.get_cell(col, row + 1).center
-				southPoint = self.get_cell(col, row - 1).center
 				self.graph.add_edge(curPoint, northPoint)
-				self.graph.add_edge(curPoint, southPoint)
 
 		for row in range(self.numRow):
-			for col in range(1, self.numCol - 1):
+			for col in range(self.numCol - 1):
 				curPoint = self.get_cell(col, row).center
 				eastPoint = self.get_cell(col + 1, row).center
-				westPoint = self.get_cell(col - 1, row).center
 				self.graph.add_edge(curPoint, eastPoint)
-				self.graph.add_edge(curPoint, westPoint)
 
 
 	def update_all_cells(self, measPolVal, xPos, yPos):
