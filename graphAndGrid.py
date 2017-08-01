@@ -113,7 +113,7 @@ def get_nodes_multiple_cells(graph, grid, cell, cellDist):
 	return nodeList
 
 
-def connect_cells_between_grids(grid1, grid2):
+def connect_neighbor_grids(grid1, grid2):
 	'''Connects the cells between two grids that are next to each other and have
 	equal resolutions. Returns a graph of the two connected grids'''
 	graph = nx.compose(grid1.graph, grid2.graph)

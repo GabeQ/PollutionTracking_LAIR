@@ -118,12 +118,11 @@ class Grid2D:
 		return self.get_cell(xID, yID)
 
 
-	def connect_grid_graph_nodes(self):
+	def connect_cells(self):
 		'''Connects the nodes of the graph within the grid with their north, south, east, and west
 		neighbors'''
 		for col in range(self.numCol):
 			for row in range(self.numRow - 1):
-				print((col, row))
 				curPoint = self.get_cell(col, row).center
 				northPoint = self.get_cell(col, row + 1).center
 				self.graph.add_edge(curPoint, northPoint)
