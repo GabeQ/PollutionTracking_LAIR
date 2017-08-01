@@ -20,3 +20,4 @@ for i in range(len(cartCoords)):
 
 nx.set_node_attributes(G, 'cartesian_coords', dic)
 grid = make_grid_from_graph(G, 1)
+grid.connect_cells()
