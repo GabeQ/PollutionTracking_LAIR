@@ -19,7 +19,7 @@ class Cell:
 		self.depth = depth
 		self.polEst = polEst
 		self.polEstVar = polEstVar
-		self.j = 0
+		self.cost = 0
 
 
 	def __repr__(self):
@@ -41,7 +41,7 @@ class Cell:
 		'''Updates the parameters for the Kalman Filter'''
 		distSquared = (xPos - self.center[0])**2 + (yPos - self.center[1])**2
 		dist = np.sqrt(distSquared)
-		measVar = meas_var_dist(dist)
+		measVar = meas_var_dist(dist) + .01
 		posteriEst, posteriEstVar = kalman_filter(self.polEst, self.polEstVar, measVal, measVar)
 		self.polEst = posteriEst
 		self.polEstVar = posteriEstVar
@@ -177,17 +177,6 @@ class Grid2D:
 						cell.update_cell_state(measPolVal, xPos, yPos)
 
 
-	# def update_objective_fun(self, xPos, yPos, alpha):
-	# 	'''updates a cell objective function given the current xPos and yPos within the grid'''
-	# 	cell = self.get_closest_cell(xPos, yPos)
-	# 	if type(cell) == Grid2D: #If cell is actually another grid
-	# 		cell.update_objective_fun(xPos, yPos, alpha)
-	# 	else:
-	# 		cell.cell_objective_function(alpha)
-	# 		self.JTotal += cell.j
-
-
-
 	def cells_with_polEst_greaterThan(self, greaterThan, cellList = []):
 		'''Returns a list of cells with pollution estimates greater than the selected value'''
 		for col in range(self.numCol):
@@ -216,30 +205,30 @@ class Grid2D:
 		self.set_cell(cell.col, cell.row, newGrid)
 
 
-	def update_resolution(self, xPos, yPos, resolution = 5):
-		'''updates the resolution of cells surrounding the xPos and yPos
-		as well as the cell containing the xPos and yPos'''
-		closestCell = self.get_closest_cell(xPos, yPos)
-		if type(closestCell) == Grid2D: #If cell is actually another grid
-			closestCell.update_resolution(xPos, yPos, resolution)
-		else:
-			iCurrent, jCurrent = closestCell.get_cell_ID()
-			xStart = iCurrent - 1
-			yStart = jCurrent - 1
-			xEnd = iCurrent + 2
-			yEnd = jCurrent + 2
-
-			if xStart < 0:
-				xStart = 0
-			if yStart < 0:
-				yStart = 0
-
-			if xEnd >= self.numCol:
-				xEnd = self.numCol
-			if yEnd >= self.numRow:
-				yEnd = self.numRow
-
-			for i in range(xStart, xEnd):
-				for j in range(yStart, yEnd):
-					cell = self.get_cell(i, j)
-					self.cell_to_grid(cell, resolution)
+	# def update_resolution(self, xPos, yPos, resolution = 5):
+	# 	'''updates the resolution of cells surrounding the xPos and yPos
+	# 	as well as the cell containing the xPos and yPos'''
+	# 	closestCell = self.get_closest_cell(xPos, yPos)
+	# 	if type(closestCell) == Grid2D: #If cell is actually another grid
+	# 		closestCell.update_resolution(xPos, yPos, resolution)
+	# 	else:
+	# 		iCurrent, jCurrent = closestCell.get_cell_ID()
+	# 		xStart = iCurrent - 1
+	# 		yStart = jCurrent - 1
+	# 		xEnd = iCurrent + 2
+	# 		yEnd = jCurrent + 2
+	#
+	# 		if xStart < 0:
+	# 			xStart = 0
+	# 		if yStart < 0:
+	# 			yStart = 0
+	#
+	# 		if xEnd >= self.numCol:
+	# 			xEnd = self.numCol
+	# 		if yEnd >= self.numRow:
+	# 			yEnd = self.numRow
+	#
+	# 		for i in range(xStart, xEnd):
+	# 			for j in range(yStart, yEnd):
+	# 				cell = self.get_cell(i, j)
+	# 				self.cell_to_grid(cell, resolution)
