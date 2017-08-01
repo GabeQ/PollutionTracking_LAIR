@@ -8,6 +8,7 @@ __copyright__ = "Copyright 2017, LAIR Project"
 import networkx as nx, math as m
 from streetNetworkGraphing import get_cart_coords
 from grid import *
+from collections import deque
 
 
 def roundup(x, num):
@@ -86,32 +87,7 @@ def get_nodes_in_cell(graph, grid, cell):
 				nodeList.append(n)
 
 	return nodeList
-
-def get_nodes_multiple_cells(graph, grid, cell, cellDist):
-	iCurrent, jCurrent = cell.get_cell_ID()
-	xStart = iCurrent - cellDist
-	yStart = jCurrent - cellDist
-	xEnd = iCurrent + cellDist + 1
-	yEnd = jCurrent + cellDist + 1
-	nodeList = []
-
-	if xStart < 0:
-		xStart = 0
-	if yStart < 0:
-		yStart = 0
-
-	if xEnd >= grid.numCol:
-		xEnd = grid.numCol
-	if yEnd >= grid.numRow:
-		yEnd = grid.numRow
-
-	for i in range(xStart, xEnd):
-		for j in range(yStart, yEnd):
-			cell = grid.get_cell(i, j)
-			nodeList += get_nodes_in_cell(graph, grid, cell)
-
-	return nodeList
-
+	
 
 def connect_neighbor_grids(grid1, grid2):
 	'''Connects the cells between two grids that are next to each other and have
@@ -149,35 +125,18 @@ def connect_neighbor_grids(grid1, grid2):
 	return graph
 
 
-def increase_grid_resolution(graph, grid, curNode):
-	cell = get_cell_from_node(graph, grid, curNode)
-	print(cell)
-	if type(cell) == Grid2D:
-		increase_grid_resolution(graph, cell, curNode)
-	else:
-		nodeList = get_nodes_in_cell(graph, grid, cell)
-		print(nodeList)
-		if len(nodeList) > 1:
-			xCoord, yCoord = graph.node[curNode]['cartesian_coords']
-			grid.update_resolution(xCoord, yCoord, resolution = 5)
-			print(grid.cells)
-			increase_grid_resolution(graph, grid, curNode)
-		else:
-			return
-
-
-# def resolution_routing(graph, grid, route, newPath):
-# 	'''Given a graph, its corresponding grid, and a route from node A to node B,
-# 	use updated resolution in the grid to replan the route'''
-# 	if route == []:
-# 		return newPath
+# def increase_grid_resolution(graph, grid, curNode):
+# 	cell = get_cell_from_node(graph, grid, curNode)
+# 	print(cell)
+# 	if type(cell) == Grid2D:
+# 		increase_grid_resolution(graph, cell, curNode)
 # 	else:
-# 		node1 = route.pop[0]
-# 		node2 = route.pop[1]
-# 		cell1 = get_cell_from_node(graph, grid, node1)
-# 		cell2 = get_cell_from_node(graph, grid, node2)
-# 		if cell1 == cell2:
-# 			nodeList = get_nodes_in_cell(graph, grid, cell1)
-# 			xCoord, yCoord = graph.node[node1]['cartesian_coords']
-# 			while len(get_nodes_in_cell(graph, grid, cell1)) > 1:
-# 				grid.update_resolution(xCoord, yCoord, resolution = 2)
+# 		nodeList = get_nodes_in_cell(graph, grid, cell)
+# 		print(nodeList)
+# 		if len(nodeList) > 1:
+# 			xCoord, yCoord = graph.node[curNode]['cartesian_coords']
+# 			grid.update_resolution(xCoord, yCoord, resolution = 5)
+# 			print(grid.cells)
+# 			increase_grid_resolution(graph, grid, curNode)
+# 		else:
+# 			return
