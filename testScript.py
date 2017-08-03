@@ -6,22 +6,19 @@ __author__ = "Gabriel Quiroz"
 __copyright__ = "Copyright 2017, LAIR Project"
 
 from graphAndGrid import *
-import networkx as nx
+from grid import *
+import networkx as nx, random
 
-G = nx.Graph()
-nodes = [0, 1, 2, 3, 4, 5]
-edges = [(0, 1), (0, 2), (1, 2), (1, 4), (1, 5), (2, 3), (3, 4), (4, 5) ]
-G.add_nodes_from(nodes)
-G.add_edges_from(edges)
-cartCoords = [(1, 1), (2, 5), (7, 4), (1, 8), (4, 5), (8, 8)]
-polEst = [32, 55, 22, 69, 87, 2]
-cartDic = {}
-polDic = {}
-for i in range(len(cartCoords)):
-	cartDic.update({nodes[i]: cartCoords[i]})
-	polDic.update({nodes[i]: polEst[i]})
+testGrid = Grid2D(4, 4, 64) #64 meters = cellLength
+testGrid.connect_cells()
+startPos = (7, 10)
+vel = 6.7 #m/s
+missionTime = 230 #seconds
 
-nx.set_node_attributes(G, 'cartesian_coords', cartDic)
-nx.set_node_attributes(G, 'pollution_amount', polDic)
-grid = Grid2D(3, 3, 3)
-grid.connect_cells()
+polMap = [] #list of tuples that contains measPol, xPos, and yPos
+
+for i in range(60): #how many pol values we want to have
+	measPol = random.randint(30, 70)
+	xPos = random.randint(testGrid.origin[0], testGrid.cellSize * testGrid.numCol)
+	yPos = random.randint(testGrid.origin[1], testGrid.cellSize * testGrid.numRow)
+	polMap.append((measPol, xPos, yPos))
