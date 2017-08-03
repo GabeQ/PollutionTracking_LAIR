@@ -54,9 +54,9 @@ def pollutionTracking_sim(graph, grid, routeList, updateDist = None):
 			yCoord = graph.node[n]['cartesian_coords'][1]
 
 			if updateDist:
-				grid.update_nearby_cells(pollution, xCoord, yCoord, updateDist)
+				grid.update_pollutionEst_nearby_cells(pollution, xCoord, yCoord, updateDist)
 			else:
-				grid.update_all_cells(pollution, xCoord, yCoord)
+				grid.update_pollutionEst_all_cells(pollution, xCoord, yCoord)
 
 	grid_pollution_surf_plotly(grid)
 
@@ -87,7 +87,7 @@ def get_nodes_in_cell(graph, grid, cell):
 				nodeList.append(n)
 
 	return nodeList
-	
+
 
 def connect_neighbor_grids(grid1, grid2):
 	'''Connects the cells between two grids that are next to each other and have
@@ -125,18 +125,28 @@ def connect_neighbor_grids(grid1, grid2):
 	return graph
 
 
-# def increase_grid_resolution(graph, grid, curNode):
-# 	cell = get_cell_from_node(graph, grid, curNode)
-# 	print(cell)
-# 	if type(cell) == Grid2D:
-# 		increase_grid_resolution(graph, cell, curNode)
-# 	else:
-# 		nodeList = get_nodes_in_cell(graph, grid, cell)
-# 		print(nodeList)
-# 		if len(nodeList) > 1:
-# 			xCoord, yCoord = graph.node[curNode]['cartesian_coords']
-# 			grid.update_resolution(xCoord, yCoord, resolution = 5)
-# 			print(grid.cells)
-# 			increase_grid_resolution(graph, grid, curNode)
-# 		else:
-# 			return
+def find_best_grid_path(streetGrid, pollutionMap, startPoint, missionTime, velocity):
+	'''Creates an initial path given the starting streetGrid and corresponding streetNetwork from the
+	startPoint to the startPoint. The path should not take longer than the missionTime going at the
+	specified velocity and the cells should not overlap. missionTime should be in seconds and velocity
+	in meters/second. The algorithm navigates through the path based on the pollution map, which contains
+	a pollution measurement and its corresponding x and y position.'''
+	maxDistance = missionTime * velocity #max distance that can be traveled given the mission time and constant velocity
+	maxCells = int(maxDistance / streetGrid.cellSize) #max cells that can be visited given the cell size and the max distance
+	for value in pollutionMap:
+		streetGrid.update_pollutionEst_all_cells(value[0], value[1], value[2])
+	startCell = streetGrid.get_closest_cell(startPoint[0], startPoint[1])
+	paths = list(nx.all_simple_paths(streetGrid.graph, startCell.center, startCell.center, maxCells))
+	bestPath = None
+	bestPathScore = 0
+	for path in paths:
+		simGrid = streetGrid
+		pathScore = 0
+		for point in path:
+			curSimCell = simGrid.get_closest_cell(point[0], point[1])
+			curSimCell.cell_objective_function(.899)
+			pathScore += curSimCell.cost
+		if pathScore > bestPathScore:
+			bestPath = path
+			bestPathScore = pathScore
+	return bestPath
