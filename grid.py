@@ -50,7 +50,7 @@ class Cell:
 	def cell_objective_function(self, alpha):
 		'''Cost function of cell for optimizing the path taken in planning a route'''
 		cost = alpha * self.polEstVar + (1 - alpha) * self.polEst
-		self.j = cost
+		self.cost = cost
 
 
 class Grid2D:
@@ -134,23 +134,23 @@ class Grid2D:
 				self.graph.add_edge(curPoint, eastPoint)
 
 
-	def update_all_cells(self, measPolVal, xPos, yPos):
+	def update_pollutionEst_all_cells(self, measPolVal, xPos, yPos):
 		'''Updates the polution estimate for all cells in the grid given the current position
 		and a measured pollution value'''
 		for i in range(self.numCol):
 			for j in range(self.numRow):
 				cell = self.get_cell(i, j)
 				if type(cell) == Grid2D: #if the cell is actually another grid
-					cell.update_all_cells(measPolVal, xPos, yPos)
+					cell.update_pollutionEst_all_cells(measPolVal, xPos, yPos)
 				else:
 					cell.update_cell_state(measPolVal, xPos, yPos)
 
 
-	def update_nearby_cells(self, measPolVal, xPos, yPos, cellDistance = 2):
+	def update_pollutionEst_nearby_cells(self, measPolVal, xPos, yPos, cellDistance = 2):
 		'''Updates the polution estimate for cells within the cell distance of the current location'''
 		closestCell = self.get_closest_cell(xPos, yPos)
 		if type(closestCell) == Grid2D:
-			closestCell.update_nearby_cells(measPolVal, xPos, yPos, cellDistance)
+			closestCell.update_pollutionEst_nearby_cells(measPolVal, xPos, yPos, cellDistance)
 		else:
 			iCurrent, jCurrent = closestCell.get_cell_ID()
 			xStart = iCurrent - cellDistance
@@ -172,7 +172,7 @@ class Grid2D:
 				for j in range(yStart, yEnd):
 					cell = self.get_cell(i, j)
 					if type(cell) == Grid2D: #If the cell is actually another grid
-						cell.update_all_cells(measPolVal, xPos, yPos)
+						cell.update_pollutionEst_all_cells(measPolVal, xPos, yPos)
 					else:
 						cell.update_cell_state(measPolVal, xPos, yPos)
 
@@ -203,32 +203,4 @@ class Grid2D:
 		newGrid.connect_grid_graph_nodes()
 		self.graph.remove_node(cell.center)
 		self.set_cell(cell.col, cell.row, newGrid)
-
-
-	# def update_resolution(self, xPos, yPos, resolution = 5):
-	# 	'''updates the resolution of cells surrounding the xPos and yPos
-	# 	as well as the cell containing the xPos and yPos'''
-	# 	closestCell = self.get_closest_cell(xPos, yPos)
-	# 	if type(closestCell) == Grid2D: #If cell is actually another grid
-	# 		closestCell.update_resolution(xPos, yPos, resolution)
-	# 	else:
-	# 		iCurrent, jCurrent = closestCell.get_cell_ID()
-	# 		xStart = iCurrent - 1
-	# 		yStart = jCurrent - 1
-	# 		xEnd = iCurrent + 2
-	# 		yEnd = jCurrent + 2
-	#
-	# 		if xStart < 0:
-	# 			xStart = 0
-	# 		if yStart < 0:
-	# 			yStart = 0
-	#
-	# 		if xEnd >= self.numCol:
-	# 			xEnd = self.numCol
-	# 		if yEnd >= self.numRow:
-	# 			yEnd = self.numRow
-	#
-	# 		for i in range(xStart, xEnd):
-	# 			for j in range(yStart, yEnd):
-	# 				cell = self.get_cell(i, j)
-	# 				self.cell_to_grid(cell, resolution)
+		return newGrid
