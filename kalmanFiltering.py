@@ -5,9 +5,15 @@
 __author__ = "Gabriel Quiroz"
 __copyright__ = "Copyright 2017, LAIR Project"
 
+import random
+
+
+def particle_sensor_sim():
+	'''Generates random values that simulate a particle sensor getting measurements'''
+	return random.randint(30, 70)
 
 def meas_var_dist(distance):
-	'''calculates the measured value variance for a given point given 
+	'''calculates the measured value variance for a given point given
 	the variance is linear with respect to distance'''
 	var = (1/500)*distance
 	return var
@@ -69,6 +75,5 @@ def kalman_filter_routing(graph, est, est_var, meas_var, startNode, num_cycl):
 		if estimated > largestEst:
 			largestEst = estimated
 			targetNode = n
-			
-	return nx.shortest_path(graph, startNode, targetNode, weight = 'length')
 
+	return nx.shortest_path(graph, startNode, targetNode, weight = 'length')
