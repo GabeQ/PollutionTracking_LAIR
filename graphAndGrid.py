@@ -125,18 +125,72 @@ def connect_neighbor_grids(grid1, grid2):
 	return graph
 
 
-def find_best_grid_path(streetGrid, pollutionMap, startPoint, missionTime, velocity):
+def make_grid_from_cells(currentGrid, cell1, cell2, resolution):
+	'''Make a grid from two cells at a specific resolution per cell'''
+	length = currentGrid.cellSize / 2
+	center1 = cell1.center
+	center2 = cell2.center
+	delta = (center2[0] - center1[0], center2[1] - center1[1])
+	if delta[0] == 0:
+		if delta[1] > 0:
+			xOrig, yOrig = center1[0] - length, center1[1] - length
+			newCellSize = currentGrid.cellSize / resolution
+			polEst = (cell1.polEst + cell2.polEst) / 2
+			polEstVar = (cell1.polEstVar + cell2.polEstVar) / 2
+			newGrid = Grid2D(resolution, resolution * 2, newCellSize, (xOrig, yOrig), parent = currentGrid, depth = currentGrid.depth + 1, polEst = polEst, polEstVar = polEstVar)
+			newGrid.connect_cells()
+			newGrid.start, newGrid.end = center1, center2
+			currentGrid.children.append(newGrid)
+			return newGrid
+		else:
+			xOrig, yOrig = center2[0] - length, center2[1] - length
+			newCellSize = currentGrid.cellSize / resolution
+			polEst = (cell1.polEst + cell2.polEst) / 2
+			polEstVar = (cell1.polEstVar + cell2.polEstVar) / 2
+			newGrid = Grid2D(resolution, resolution * 2, newCellSize, (xOrig, yOrig), parent = currentGrid, depth = currentGrid.depth + 1, polEst = polEst, polEstVar = polEstVar)
+			newGrid.connect_cells()
+			newGrid.start, newGrid.end = center2, center1
+			currentGrid.children.append(newGrid)
+			return newGrid
+	else:
+		if delta[0] > 0:
+			xOrig, yOrig = center1[0] - length, center1[1] - length
+			newCellSize = currentGrid.cellSize / resolution
+			polEst = (cell1.polEst + cell2.polEst) / 2
+			polEstVar = (cell1.polEstVar + cell2.polEstVar) / 2
+			newGrid = Grid2D(resolution * 2, resolution, newCellSize, (xOrig, yOrig), parent = currentGrid, depth = currentGrid.depth + 1, polEst = polEst, polEstVar = polEstVar)
+			newGrid.connect_cells()
+			newGrid.start, newGrid.end = center1, center2
+			currentGrid.children.append(newGrid)
+			return newGrid
+		else:
+			xOrig, yOrig = center2[0] - length, center2[1] - length
+			newCellSize = currentGrid.cellSize / resolution
+			polEst = (cell1.polEst + cell2.polEst) / 2
+			polEstVar = (cell1.polEstVar + cell2.polEstVar) / 2
+			newGrid = Grid2D(resolution * 2, resolution, newCellSize, (xOrig, yOrig), parent = currentGrid, depth = currentGrid.depth + 1, polEst = polEst, polEstVar = polEstVar)
+			newGrid.connect_cells()
+			newGrid.start, newGrid.end = center2, center1
+			currentGrid.children.append(newGrid)
+			return newGrid
+
+
+def find_best_grid_path(streetGrid, pollutionMap, missionTime, velocity, startPoint, endPoint = None):
 	'''Creates an initial path given the starting streetGrid and corresponding streetNetwork from the
 	startPoint to the startPoint. The path should not take longer than the missionTime going at the
 	specified velocity and the cells should not overlap. missionTime should be in seconds and velocity
 	in meters/second. The algorithm navigates through the path based on the pollution map, which contains
 	a pollution measurement and its corresponding x and y position.'''
+	if endPoint == None:
+		end = startPoint
+	else: end = endPoint
 	maxDistance = missionTime * velocity #max distance that can be traveled given the mission time and constant velocity
 	maxCells = int(maxDistance / streetGrid.cellSize) #max cells that can be visited given the cell size and the max distance
 	for value in pollutionMap:
 		streetGrid.update_pollutionEst_all_cells(value[0], value[1], value[2])
 	startCell = streetGrid.get_closest_cell(startPoint[0], startPoint[1])
-	paths = list(nx.all_simple_paths(streetGrid.graph, startCell.center, startCell.center, maxCells))
+	endCell = streetGrid.get_closest_cell(end[0], end[1])
+	paths = list(nx.all_simple_paths(streetGrid.graph, startCell.center, endCell.center, maxCells))
 	bestPath = None
 	bestPathScore = 0
 	for path in paths:
@@ -149,4 +203,30 @@ def find_best_grid_path(streetGrid, pollutionMap, startPoint, missionTime, veloc
 		if pathScore > bestPathScore:
 			bestPath = path
 			bestPathScore = pathScore
-	return bestPath
+	return deque(bestPath)
+
+
+def cellDecompRouting(currentStreetGrid, pollutionMap, startPoint, newPath = [], missionTime, velocity, desiredDepth):
+	if currentStreetGrid.route == None and currentStreetGrid.depth == 0: #if the current grid does not have a path, create the path on the grid, perform algorithm again
+		path = find_best_grid_path(currentStreetGrid, pollutionMap, missionTime, velocity, startPoint)
+		currentStreetGrid.route = path
+		cellDecompRouting(currentStreetGrid, pollutionMap, startPoint, newPath, missionTime, velocity, desiredDepth)
+	elif currentStreetGrid.route == None and currentStreetGrid.depth != 0:
+		path = find_best_grid_path(currentStreetGrid, pollutionMap, missionTime, velocity, currentStreetGrid.start, endPoint = currentStreetGrid.end)
+		currentStreetGrid.route = path
+		cellDecompRouting(currentStreetGrid, pollutionMap, startPoint, newPath, missionTime, veloxity, desiredDepth)
+	else:
+		if len(currentStreetGrid.route) == 0:
+			return newPath
+		else:
+			if currentStreetGrid.depth == desiredDepth:
+				newPath += list(currentStreetGrid.route)
+				parentGrid = currentStreetGrid.parent
+				cellDecompRouting(currentStreetGrid, pollutionMap, currentStreetGrid.end, missionTime, velocity, desiredDepth)
+			else:
+				curPoint = currentStreetGrid.route.popleft()
+				nextPoint = currentStreetGrid.route.popleft()
+				curCell = currentStreetGrid.get_closest_cell(curPoint[0], curPoint[1])
+				nextCell = currentStreetGrid.get_closest_cell(nextPoint[0], nextPoint[1])
+				childGrid = make_grid_from_cells(curCell, nextCell, 4)
+				cellDecompRouting(childGrid, pollutionMap, curPoint, newPath, missionTime, velocity, desiredDepth)
