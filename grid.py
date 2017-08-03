@@ -11,12 +11,10 @@ import numpy as np, networkx as nx
 
 class Cell:
 
-	def __init__(self, col, row, midpoint, parent, depth, polEst, polEstVar):
+	def __init__(self, col, row, midpoint, polEst, polEstVar):
 		self.col = col
 		self.row = row
 		self.center = midpoint
-		self.parent = parent
-		self.depth = depth
 		self.polEst = polEst
 		self.polEstVar = polEstVar
 		self.cost = 0
@@ -65,8 +63,11 @@ class Grid2D:
 		self.origin = gridOrigin
 		self.parent = parent
 		self.depth = depth
+		self.children = []
 		self.graph = nx.Graph()
-		self.JTotal = 0
+		self.route = None
+		self.start = None
+		self.end = None
 		colDist = gridOrigin[0]
 		colCells = []
 
@@ -76,7 +77,7 @@ class Grid2D:
 
 			for row in range(numRow):
 				midpoint = (colDist + cellSize/2.0, rowDist + cellSize/2.0)
-				cell = Cell(col, row, midpoint, self, self.depth + 1, polEst, polEstVar)
+				cell = Cell(col, row, midpoint, polEst, polEstVar)
 				rowCells.append(cell)
 				self.graph.add_node(cell.center)
 				rowDist += cellSize
@@ -203,4 +204,3 @@ class Grid2D:
 		newGrid.connect_cells()
 		self.graph.remove_node(cell.center)
 		self.set_cell(cell.col, cell.row, newGrid)
-		return newGrid
