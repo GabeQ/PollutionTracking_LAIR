@@ -200,7 +200,7 @@ class Grid2D:
 		polEst = cell.polEst
 		polEstVar = cell.polEstVar
 		newGrid = Grid2D(resolution, resolution, newCellSize, (xOrig, yOrig), parent = self, depth = self.depth + 1, polEst = polEst, polEstVar = polEstVar)
-		newGrid.connect_grid_graph_nodes()
+		newGrid.connect_cells()
 		self.graph.remove_node(cell.center)
 		self.set_cell(cell.col, cell.row, newGrid)
 		return newGrid
