@@ -5,7 +5,7 @@ from time import gmtime, strftime
 # Select COM port to recieve data and open it
 ser = serial.Serial()
 ser.baudrate = 4800
-ser.port = 'COM5'
+ser.port = 'COM4'
 ser.open()
 
 # Create file to write cartesian coordinates to
