@@ -5,7 +5,7 @@
 __author__ = "Gabriel Quiroz"
 __copyright__ = "Copyright 2017, LAIR Project"
 
-from streetNetworkGraphing import get_long_lat_coords, get_cart_coords
+from streetNetworkGraphing import get_lat_long_coords, get_cart_coords
 from grid import *
 import osmnx as ox, matplotlib.cm as cm, plotly.plotly as py, plotly.graph_objs as go
 
@@ -66,11 +66,11 @@ def graph_pollution_mesh_plotly(graph):
 
 
 def graph_pollution_surf_plotly(graph):
-	'''Takes a graph and plots the surface plot of pollution. X and Y values are both in meters away from the 
+	'''Takes a graph and plots the surface plot of pollution. X and Y values are both in meters away from the
 	origin (southernmost node).'''
 
-	latCoords = [coord[1] for coord in get_long_lat_coords(graph)]
-	longCoords = [coord[0] for coord in get_long_lat_coords(graph)]
+	latCoords = [coord[0] for coord in get_lat_long_coords(graph)]
+	longCoords = [coord[1] for coord in get_lat_long_coords(graph)]
 	nodes = graph.nodes()
 	cartCoords = get_cart_coords(graph)
 	x = [cartCoords[i][0] for i in range(len(cartCoords))]
@@ -120,4 +120,3 @@ def grid_pollution_surf_plotly(grid):
 	data = [go.Surface(x = x, y = y, z = pollution)]
 	fig = go.Figure(data = data)
 	py.plot(fig, filename = 'grid_pollution_data')
-

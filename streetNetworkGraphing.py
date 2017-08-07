@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-'''pollutionMapping_LAIR.py: Contains basic functions for analyzing street network data from osmnx. 
+'''pollutionMapping_LAIR.py: Contains basic functions for analyzing street network data from osmnx.
 Cite to http://geoffboeing.com/2016/11/osmnx-python-street-networks/'''
 
 __author__ = "Gabriel Quiroz"
@@ -11,29 +11,29 @@ from collections import defaultdict, deque
 earthRadius = 6.371e6
 
 
-def get_long_lat_coords(graph):
+def get_lat_long_coords(graph):
 	'''returns list of tuples giving latitude, longitude pair'''
-	return [(graph.node[n]['x'], graph.node[n]['y']) for n in graph.nodes()]
+	return [(graph.node[n]['y'], graph.node[n]['x']) for n in graph.nodes()]
 
 
-def get_long_lat_coords_route(graph, route):
+def get_lat_long_coords_route(graph, route):
 	'''returns list of latitude and longitude tuples for a given route'''
-	return [(graph.node[n]['x'], graph.node[n]['y']) for n in route]
+	return [(graph.node[n]['y'], graph.node[n]['x']) for n in route]
 
 
 def set_cart_coords(graph, originCoord = None):
-	'''Converts longitude latitude coordinates to cartesian coordinates (in meters) based off their distance from
+	'''Converts latitude longitude coordinates to cartesian coordinates (in meters) based off their distance from
 	the origin. If the origin coordinate is none, chooses the southernmost node in the graph to be the origin'''
-	latCoords = [coord[1] for coord in get_long_lat_coords(graph)]
-	longCoords = [coord[0] for coord in get_long_lat_coords(graph)]
+	latCoords = [coord[0] for coord in get_lat_long_coords(graph)]
+	longCoords = [coord[1] for coord in get_lat_long_coords(graph)]
 
 	if originCoord:
 		originID = ox.get_nearest_node(graph, originCoord)
-		origin = (graph.node[originID]['x'], graph.node[originID]['y'],)
+		origin = (graph.node[originID]['y'], graph.node[originID]['x'],)
 	else:
 		index = latCoords.index(min(latCoords))
 		originID = graph.nodes()[index]
-		origin = (graph.node[originID]['x'], graph.node[originID]['y'],)
+		origin = (graph.node[originID]['y'], graph.node[originID]['x'],)
 
 	print("Origin set at:", origin)
 	cartesianCoords = {}
@@ -45,7 +45,7 @@ def set_cart_coords(graph, originCoord = None):
 			xval = (graph.node[n]['x'] - origin[0])*(np.pi/180)*np.cos((graph.node[n]['y'] - origin[1])/2*np.pi/180)*earthRadius
 			yval = (graph.node[n]['y'] - origin[1])*np.pi/180*earthRadius
 			cartesianCoords.update({n: (xval, yval)})
-	
+
 	nx.set_node_attributes(graph, 'cartesian_coords', cartesianCoords)
 
 
@@ -54,7 +54,7 @@ def get_cart_coords(graph):
 
 
 def nodeList_to_edgeList(nodeList):
-	'''converts a list of neighbor nodes to their respective edges (used to convert 
+	'''converts a list of neighbor nodes to their respective edges (used to convert
 	a route of nodes to a route of edges).'''
 
 	edgeList = []
@@ -63,4 +63,3 @@ def nodeList_to_edgeList(nodeList):
 		edgeList.append((nodeList[i], nodeList[i+1],))
 
 	return edgeList
-
