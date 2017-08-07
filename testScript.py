@@ -22,3 +22,4 @@ for i in range(60): #how many pol values we want to have
 	xPos = random.randint(testGrid.origin[0], testGrid.cellSize * testGrid.numCol)
 	yPos = random.randint(testGrid.origin[1], testGrid.cellSize * testGrid.numRow)
 	polMap.append((measPol, xPos, yPos))
+#this is a change
