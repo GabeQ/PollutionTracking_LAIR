@@ -9,11 +9,11 @@ from graphAndGrid import *
 from grid import *
 import networkx as nx, random
 
-testGrid = Grid2D(4, 4, 64) #64 meters = cellLength
+testGrid = Grid2D(4, 4, 16) #64 meters = cellLength
 testGrid.connect_cells()
 startPos = (7, 10)
-vel = 6.7 #m/s
-missionTime = 230 #seconds
+vel = 4 #m/s
+missionTime = 30 #seconds
 
 polMap = [] #list of tuples that contains measPol, xPos, and yPos
 
