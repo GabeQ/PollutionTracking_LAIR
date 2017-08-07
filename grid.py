@@ -68,6 +68,7 @@ class Grid2D:
 		self.route = None
 		self.start = None
 		self.end = None
+		self.timeForChild = None
 		colDist = gridOrigin[0]
 		colCells = []
 
@@ -117,6 +118,10 @@ class Grid2D:
 		if yID == self.numRow:
 			yID -= 1
 		return self.get_cell(xID, yID)
+
+
+	def add_child_grid_time(self, time):
+		self.timeForChild = time
 
 
 	def connect_cells(self):
