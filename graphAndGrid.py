@@ -175,7 +175,7 @@ def make_grid_from_cells(currentGrid, cell1, cell2, resolution):
 			return newGrid
 
 
-def find_best_grid_path(streetGrid, pollutionMap, missionTime, velocity, startPoint, endPoint = None):
+def find_best_grid_path(streetGrid, pollutionMap, missionTime, velocity, startPoint, endPoint = None, timeFactor = 1):
 	'''Creates an initial path given the starting streetGrid and corresponding streetNetwork from the
 	startPoint to the startPoint. The path should not take longer than the missionTime going at the
 	specified velocity and the cells should not overlap. missionTime should be in seconds and velocity
@@ -184,8 +184,9 @@ def find_best_grid_path(streetGrid, pollutionMap, missionTime, velocity, startPo
 	if endPoint == None:
 		end = startPoint
 	else: end = endPoint
-	maxDistance = missionTime * velocity #max distance that can be traveled given the mission time and constant velocity
-	maxCells = int(maxDistance / streetGrid.cellSize) #max cells that can be visited given the cell size and the max distance
+	maxDistance = missionTime * timeFactor * velocity #max distance that can be traveled given the mission time and constant velocity
+	maxCells = int(maxDistance / (streetGrid.cellSize)) #max cells that can be visited given the cell size and the max distance
+	print(maxCells)
 	for value in pollutionMap:
 		streetGrid.update_pollutionEst_all_cells(value[0], value[1], value[2])
 	startCell = streetGrid.get_closest_cell(startPoint[0], startPoint[1])
@@ -209,41 +210,47 @@ def find_best_grid_path(streetGrid, pollutionMap, missionTime, velocity, startPo
 
 def cellDecompRouting(currentStreetGrid, pollutionMap, startPoint, initMissionTime, velocity, desiredDepth, newPath = []):
 	#First case, for toplevel grid that has no path. Gives the toplevel grid a path based on the pollution map, adds mission time to toplevel grid
-	print(currentStreetGrid.depth)
-	print(currentStreetGrid.route)
+	print('Current route: ' + str(currentStreetGrid.route) + ', depth: ' + str(currentStreetGrid.depth))
 	if currentStreetGrid.route == None and currentStreetGrid.depth == 0:
 		path = find_best_grid_path(currentStreetGrid, pollutionMap, initMissionTime, velocity, startPoint)
 		print('Initial Path:' + str(path))
 		currentStreetGrid.route = path
-		childMissionTime = int(initMissionTime/ (len(path) - 1))
+		childMissionTime = int(initMissionTime*2/ (len(path) - 1))
+		print('Time: ' + str(childMissionTime))
 		currentStreetGrid.add_child_grid_time(childMissionTime)
-		cellDecompRouting(currentStreetGrid, pollutionMap, startPoint, None, velocity, desiredDepth, newPath = newPath)
+		return cellDecompRouting(currentStreetGrid, pollutionMap, startPoint, None, velocity, desiredDepth, newPath = newPath)
 	#Child case, for children grids that have no path. Gives the childgrid a path based on the pollution map, adds mission time to child grid
 	elif currentStreetGrid.route == None and currentStreetGrid.depth != desiredDepth:
-		path = find_best_grid_path(currentStreetGrid, pollutionMap, currentStreetGrid.parent.timeForChild, velocity, currentStreetGrid.start, endPoint = currentStreetGrid.end)
+		path = find_best_grid_path(currentStreetGrid, pollutionMap, currentStreetGrid.parent.timeForChild,
+			velocity, currentStreetGrid.start, endPoint = currentStreetGrid.end, timeFactor = 2)
 		print('Path from ' + str(currentStreetGrid.start) + ' to ' + str(currentStreetGrid.end) + ': ' + str(path))
 		currentStreetGrid.route = path
-		childMissionTime = int(currentStreetGrid.parent.timeForChild / (len(path) - 1))
+		childMissionTime = int(currentStreetGrid.parent.timeForChild*2 / (len(path) - 1))
+		print('Time: ' + str(childMissionTime))
 		currentStreetGrid.add_child_grid_time(childMissionTime)
-		cellDecompRouting(currentStreetGrid, pollutionMap, startPoint, None, velocity, desiredDepth, newPath = newPath)
+		return cellDecompRouting(currentStreetGrid, pollutionMap, startPoint, None, velocity, desiredDepth, newPath = newPath)
 	elif currentStreetGrid.route == None and currentStreetGrid.depth == desiredDepth:
-		path = find_best_grid_path(currentStreetGrid, pollutionMap, currentStreetGrid.parent.timeForChild, velocity, currentStreetGrid.start, endPoint = currentStreetGrid.end)
+		path = find_best_grid_path(currentStreetGrid, pollutionMap, currentStreetGrid.parent.timeForChild,
+			velocity, currentStreetGrid.start, endPoint = currentStreetGrid.end, timeFactor = 3)
 		currentStreetGrid.route = path
 		newPath += list(path)
 		print('newPath' + str(newPath))
 		parentGrid = currentStreetGrid.parent
-		cellDecompRouting(parentGrid, pollutionMap, currentStreetGrid.end, None, velocity, desiredDepth, newPath = newPath)
+		return cellDecompRouting(parentGrid, pollutionMap, currentStreetGrid.end, None, velocity, desiredDepth, newPath = newPath)
 	else:
 		#Base case: If the current grid is the toplevel grid and the original route is empty, return the new path
 		if len(currentStreetGrid.route) == 1 and currentStreetGrid.depth == 0:
-			return newPath
+			print('end')
+			print(newPath)
+			finalPath = newPath
+			return finalPath
 		elif len(currentStreetGrid.route) == 1 and currentStreetGrid.depth != 0:
 			parentGrid = currentStreetGrid.parent
-			cellDecompRouting(parentGrid, pollutionMap, currentGrid.end, None, velocity, desiredDepth, newPath)
+			return cellDecompRouting(parentGrid, pollutionMap, currentStreetGrid.end, None, velocity, desiredDepth, newPath)
 		else:
 			curPoint = currentStreetGrid.route.popleft()
 			nextPoint = list(currentStreetGrid.route)[0]
 			curCell = currentStreetGrid.get_closest_cell(curPoint[0], curPoint[1])
 			nextCell = currentStreetGrid.get_closest_cell(nextPoint[0], nextPoint[1])
 			childGrid = make_grid_from_cells(currentStreetGrid, curCell, nextCell, 4)
-			cellDecompRouting(childGrid, pollutionMap, curPoint, None, velocity, desiredDepth, newPath = newPath)
+			return cellDecompRouting(childGrid, pollutionMap, curPoint, None, velocity, desiredDepth, newPath = newPath)
