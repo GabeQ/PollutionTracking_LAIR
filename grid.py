@@ -53,7 +53,7 @@ class Cell:
 
 class Grid2D:
 
-	def __init__(self, numCol, numRow, cellSize, gridOrigin = (0, 0), parent = None, depth = 0, polEst = 100, polEstVar = 20):
+	def __init__(self, numCol, numRow, cellSize, gridOrigin = (0, 0), parent = None, depth = 0, polEst = 4000, polEstVar = 1000):
 		'''Initializes a 2D Grid given the length (x) and width (y) of the grid. The data parameter should be given as a 2D list.
 		The length of the main list should be size X and the lenght of each list within the list should be size Y. The grid
 		origin is the bottom left most point of the grid.'''
