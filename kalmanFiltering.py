@@ -15,7 +15,7 @@ def particle_sensor_sim():
 def meas_var_dist(distance):
 	'''calculates the measured value variance for a given point given
 	the variance is linear with respect to distance'''
-	var = (1/500)*distance
+	var = (1/5)*distance
 	return var
 
 
