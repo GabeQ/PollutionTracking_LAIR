@@ -29,11 +29,11 @@ def set_cart_coords(graph, originCoord = None):
 
 	if originCoord:
 		originID = ox.get_nearest_node(graph, originCoord)
-		origin = (graph.node[originID]['y'], graph.node[originID]['x'],)
+		origin = (graph.node[originID]['x'], graph.node[originID]['y'],)
 	else:
 		index = latCoords.index(min(latCoords))
 		originID = graph.nodes()[index]
-		origin = (graph.node[originID]['y'], graph.node[originID]['x'],)
+		origin = (graph.node[originID]['x'], graph.node[originID]['y'],)
 
 	print("Origin set at:", origin)
 	cartesianCoords = {}
