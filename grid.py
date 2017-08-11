@@ -71,7 +71,7 @@ class Grid2D:
 		self.timeForChild = None
 		colDist = gridOrigin[0]
 		colCells = []
-
+		
 		for col in range(numCol):
 			rowDist = gridOrigin[1]
 			rowCells = []
