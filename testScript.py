@@ -9,7 +9,7 @@ from graphAndGrid import *
 from grid import *
 import networkx as nx, random
 
-testGrid = Grid2D(4, 4, 16) #64 meters = cellLength
+testGrid = Grid2D(4, 4, 10) #64 meters = cellLength
 testGrid.connect_cells()
 startPos = (7, 10)
 vel = 4 #m/s
