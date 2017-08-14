@@ -21,8 +21,10 @@ def rounddown(x, num):
 	return m.floor(x/float(num))*num
 
 
-def make_grid_from_graph(graph, roundNum = 10):
-	'''Makes a grid with size specified from the graph's cartesian coordinates.'''
+def make_grid_from_graph(graph, roundNum = 50):
+	'''Makes a grid with size specified from the graph's cartesian coordinates. Grid will
+	have a cell size of roundNum, and have the number of columns and rows to account for the cell
+	size.'''
 	cartCoords = get_cart_coords(graph)
 	xCoords = [coord[0] for coord in cartCoords]
 	yCoords = [coord[1] for coord in cartCoords]
@@ -30,17 +32,28 @@ def make_grid_from_graph(graph, roundNum = 10):
 	bottom = min(yCoords)
 	right = max(xCoords)
 	top = max(yCoords)
-
 	dx = right - left
 	dy = top - bottom
-	dx = roundup(dx, roundNum) + roundNum
-	dy = roundup(dy, roundNum) + roundNum
-
-	numCol = dx/roundNum
-	numRow = dy/roundNum
+	dx = roundup(dx, roundNum)
+	dy = roundup(dy, roundNum)
+	numCol = int(dx/roundNum)
+	numRow = int(dy/roundNum)
 	cellSize = roundNum
-	origin = (rounddown(left, roundNum) - roundNum, rounddown(bottom, roundNum) - roundNum)
-	return Grid2D(int(numCol), int(numRow), cellSize, gridOrigin = origin)
+	origin = (rounddown(left, roundNum), rounddown(bottom, roundNum))
+	return Grid2D(numCol, numRow, cellSize, gridOrigin = origin)
+
+
+def make_pollution_map(grid, numValues):
+	'''Makes a pollution map which is a list of tuples. Each tuple contains
+	measured pollution, xPosition, and yPosition in that order. all values are
+	randomly generated'''
+	polMap = []
+	for i in range(numValues): #how many pol values we want to have
+		measPol = random.randint(2000, 6000)
+		xPos = random.randint(grid.origin[0], testGrid.cellSize * testGrid.numCol)
+		yPos = random.randint(grid.origin[1], testGrid.cellSize * testGrid.numRow)
+		polMap.append((measPol, xPos, yPos))
+	return polMap
 
 
 def pollutionTracking_sim(graph, grid, routeList, updateDist = None):
@@ -59,6 +72,22 @@ def pollutionTracking_sim(graph, grid, routeList, updateDist = None):
 				grid.update_pollutionEst_all_cells(pollution, xCoord, yCoord)
 
 	grid_pollution_surf_plotly(grid)
+
+
+def get_node_from_point(graph, point):
+	'''Gets the closest node on the graph from the specified point. Uses the graph's cartesian
+	coordinates to get the closest point'''
+	closestNode =  None
+	smallestDist = m.inf
+	for n in graph.nodes():
+		xPos, yPos = graph.node[n]['cartesian_coords']
+		dist = m.sqrt((xPos - point[0])**2 + (yPos - point[1])**2)
+		if dist < smallestDist:
+			closestNode = n
+			smallestDist = dist
+			print('Node: ' + str(closestNode) + ' Dist: ' + str(smallestDist))
+	return closestNode
+
 
 
 def get_cell_from_node(graph, grid, node):
@@ -185,12 +214,15 @@ def find_best_grid_path(streetGrid, pollutionMap, missionTime, velocity, startPo
 		end = startPoint
 	else: end = endPoint
 	maxDistance = missionTime * velocity #max distance that can be traveled given the mission time and constant velocity
-	maxCells = int(maxDistance / (streetGrid.cellSize* timeFactor)) #max cells that can be visited given the cell size and the max distance
-	print(maxCells)
+	maxCells = int(maxDistance / (streetGrid.cellSize * timeFactor)) #max cells that can be visited given the cell size and the max distance
+	print('Number of cells that can be visited: ' + str(maxCells))
 	for value in pollutionMap:
 		streetGrid.update_pollutionEst_all_cells(value[0], value[1], value[2])
 	startCell = streetGrid.get_closest_cell(startPoint[0], startPoint[1])
 	endCell = streetGrid.get_closest_cell(end[0], end[1])
+	minCells = len(nx.shortest_path(streetGrid.graph, startCell.center, endCell.center)) - 1
+	if maxCells < minCells:
+		maxCells = minCells
 	paths = list(nx.all_simple_paths(streetGrid.graph, startCell.center, endCell.center, maxCells))
 	bestPath = None
 	bestPathScore = 0
@@ -201,10 +233,10 @@ def find_best_grid_path(streetGrid, pollutionMap, missionTime, velocity, startPo
 			curSimCell = simGrid.get_closest_cell(point[0], point[1])
 			curSimCell.cell_objective_function(.899)
 			pathScore += curSimCell.cost
-		print('Path: ' + str(path) + '; Score: ' + str(pathScore))
 		if pathScore > bestPathScore:
 			bestPath = path
 			bestPathScore = pathScore
+	print(bestPath)
 	return deque(bestPath)
 
 
@@ -212,13 +244,14 @@ def cell_decomp_routing(currentStreetGrid, pollutionMap, startPoint, initMission
 	#First case, for toplevel grid that has no path. Gives the toplevel grid a path based on the pollution map, adds mission time to toplevel grid
 	print('Current route: ' + str(currentStreetGrid.route) + ', depth: ' + str(currentStreetGrid.depth))
 	if currentStreetGrid.route == None and currentStreetGrid.depth == 0:
+		print('Initial Mission Time: ' + str(initMissionTime))
 		path = find_best_grid_path(currentStreetGrid, pollutionMap, initMissionTime, velocity, startPoint)
 		path[0] = startPoint
 		path[-1] = startPoint
 		print('Initial Path:' + str(path))
 		currentStreetGrid.route = path
-		childMissionTime = int(initMissionTime/ (len(path) - 1))
-		print('Time: ' + str(childMissionTime))
+		childMissionTime = int(currentStreetGrid.cellSize * (len(path) - 1) / velocity)
+		print('Time for child: ' + str(childMissionTime))
 		currentStreetGrid.add_child_grid_time(childMissionTime)
 		return cell_decomp_routing(currentStreetGrid, pollutionMap, startPoint, None, velocity, desiredDepth, newPath = newPath)
 	#Child case, for children grids that have no path. Gives the childgrid a path based on the pollution map, adds mission time to child grid
@@ -227,7 +260,7 @@ def cell_decomp_routing(currentStreetGrid, pollutionMap, startPoint, initMission
 			velocity, currentStreetGrid.start, endPoint = currentStreetGrid.end)
 		print('Path from ' + str(currentStreetGrid.start) + ' to ' + str(currentStreetGrid.end) + ': ' + str(path))
 		currentStreetGrid.route = path
-		childMissionTime = int(currentStreetGrid.parent.timeForChild / (len(path) - 1))
+		childMissionTime = int(currentStreetGrid.cellSize * (len(path) - 1) / velocity)
 		print('Time: ' + str(childMissionTime))
 		currentStreetGrid.add_child_grid_time(childMissionTime)
 		return cell_decomp_routing(currentStreetGrid, pollutionMap, startPoint, None, velocity, desiredDepth, newPath = newPath)
