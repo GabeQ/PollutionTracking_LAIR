@@ -31,20 +31,7 @@ add_pollution_all_nodes(Claremont, pollutionSources, osmID = True)
 
 '''Global Variables for small tests on 1km area'''
 center = (34.107089, -117.720289)
-testGraph = ox.graph_from_point(center, distance = 1000, network_type = 'drive')
+testGraph = ox.graph_from_point(center, distance = 500, network_type = 'drive')
 set_cart_coords(testGraph)
 transfer_graph_node_pollution(Claremont, testGraph)
-testGrid = make_grid_from_graph(testGraph)
-#Nodes to create path
-start = ox.get_nearest_node(testGraph, (34.115018, -117.728304))
-point2 = ox.get_nearest_node(testGraph, (34.098927, -117.729273))
-point3 = ox.get_nearest_node(testGraph, (34.099659, -117.712609))
-point4 = ox.get_nearest_node(testGraph, (34.107089, -117.720289))
-#Paths selected and put into a pathlist
-path1 = nx.shortest_path(testGraph, start, point2, weight = 'length')
-path2 = nx.shortest_path(testGraph, point2, point3, weight = 'length')
-path3 = nx.shortest_path(testGraph, point3, point4, weight = 'length')
-path4 = nx.shortest_path(testGraph, point4, start, weight = 'length')
-pathList = [path1, path2, path3, path4]
-polList = [testGraph.node[n]['pollution_amount'] for n in testGraph.nodes()]
-maxPolNode = testGraph.nodes()[polList.index(max(polList))]
+testGrid = make_grid_from_graph(testGraph, 250)
