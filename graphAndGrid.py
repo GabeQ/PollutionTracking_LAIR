@@ -9,6 +9,7 @@ import networkx as nx, math as m
 from streetNetworkGraphing import get_cart_coords
 from grid import *
 from collections import deque
+import random
 
 
 def roundup(x, num):
@@ -40,7 +41,10 @@ def make_grid_from_graph(graph, roundNum = 50):
 	numRow = int(dy/roundNum)
 	cellSize = roundNum
 	origin = (rounddown(left, roundNum), rounddown(bottom, roundNum))
-	return Grid2D(numCol, numRow, cellSize, gridOrigin = origin)
+	grid = Grid2D(numCol, numRow, cellSize, gridOrigin = origin)
+	grid.connect_cells()
+	return grid
+
 
 
 def make_pollution_map(grid, numValues):
@@ -50,8 +54,8 @@ def make_pollution_map(grid, numValues):
 	polMap = []
 	for i in range(numValues): #how many pol values we want to have
 		measPol = random.randint(2000, 6000)
-		xPos = random.randint(grid.origin[0], testGrid.cellSize * testGrid.numCol)
-		yPos = random.randint(grid.origin[1], testGrid.cellSize * testGrid.numRow)
+		xPos = random.randint(grid.origin[0], grid.cellSize * grid.numCol)
+		yPos = random.randint(grid.origin[1], grid.cellSize * grid.numRow)
 		polMap.append((measPol, xPos, yPos))
 	return polMap
 
@@ -72,22 +76,6 @@ def pollutionTracking_sim(graph, grid, routeList, updateDist = None):
 				grid.update_pollutionEst_all_cells(pollution, xCoord, yCoord)
 
 	grid_pollution_surf_plotly(grid)
-
-
-def get_node_from_point(graph, point):
-	'''Gets the closest node on the graph from the specified point. Uses the graph's cartesian
-	coordinates to get the closest point'''
-	closestNode =  None
-	smallestDist = m.inf
-	for n in graph.nodes():
-		xPos, yPos = graph.node[n]['cartesian_coords']
-		dist = m.sqrt((xPos - point[0])**2 + (yPos - point[1])**2)
-		if dist < smallestDist:
-			closestNode = n
-			smallestDist = dist
-			print('Node: ' + str(closestNode) + ' Dist: ' + str(smallestDist))
-	return closestNode
-
 
 
 def get_cell_from_node(graph, grid, node):
@@ -222,6 +210,7 @@ def find_best_grid_path(streetGrid, pollutionMap, missionTime, velocity, startPo
 	endCell = streetGrid.get_closest_cell(end[0], end[1])
 	minCells = len(nx.shortest_path(streetGrid.graph, startCell.center, endCell.center)) - 1
 	if maxCells < minCells:
+		print("Timeout for mission at current depth: " + str(streetGrid.depth))
 		maxCells = minCells
 	paths = list(nx.all_simple_paths(streetGrid.graph, startCell.center, endCell.center, maxCells))
 	bestPath = None
@@ -289,3 +278,35 @@ def cell_decomp_routing(currentStreetGrid, pollutionMap, startPoint, initMission
 			nextCell = currentStreetGrid.get_closest_cell(nextPoint[0], nextPoint[1])
 			childGrid = make_grid_from_cells(currentStreetGrid, curCell, nextCell, curPoint, nextPoint, 4)
 			return cell_decomp_routing(childGrid, pollutionMap, curPoint, None, velocity, desiredDepth, newPath = newPath)
+
+
+def get_node_from_point(graph, point):
+	'''Gets the closest node on the graph from the specified point. Uses the graph's cartesian
+	coordinates to get the closest point'''
+	closestNode =  None
+	smallestDist = m.inf
+	for n in graph.nodes():
+		xPos, yPos = graph.node[n]['cartesian_coords']
+		dist = m.sqrt((xPos - point[0])**2 + (yPos - point[1])**2)
+		if dist < smallestDist:
+			closestNode = n
+			smallestDist = dist
+	return closestNode
+
+
+def path_to_street(graph, gridPath):
+	'''Takes a path created by cell_decomp_routing and maps it to the street network nodes of a graph'''
+	streetNodePath = []
+	for point in gridPath:
+		node = get_node_from_point(graph, point)
+		if streetNodePath == []:
+			streetNodePath.append(node)
+		else:
+			prevNode = streetNodePath[-1]
+			if node != prevNode:
+				if node in graph.neighbors(prevNode):
+					streetNodePath.append(node)
+				else:
+					path = nx.shortest_path(graph, prevNode, node)
+					streetNodePath += path
+	return streetNodePath
