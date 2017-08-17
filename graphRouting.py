@@ -15,7 +15,10 @@ def graphRouting(graph, route):
 	for edge in path:
 		node1 = edge[0]
 		node2 = edge[1]
-		name = graph.edge[node1][node2][0]['name']
+		if 'name' in graph.edge[node1][node2][0]:
+			name = graph.edge[node1][node2][0]['name']
+		else:
+			name = None
 		dy = graph.node[node2]['y'] - graph.node[node1]['y']
 		dx = graph.node[node2]['x'] - graph.node[node1]['x']
 
@@ -32,6 +35,7 @@ def graphRouting(graph, route):
 			xdir = 'EAST'
 		else:
 			xdir = 'WEST'
-
-		print('Go' +' '+ ydir + ' ' + xdir + ' ' + 'on' + ' ' + name)
-
+		if name:
+			print('Go' +' '+ ydir + ' ' + xdir + ' ' + 'on' + ' ' + name)
+		else:
+			print('Turn' + ' ' + ydir + ' ' + xdir + ' ' 'at next intersection')
