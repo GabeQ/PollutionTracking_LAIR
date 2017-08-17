@@ -28,12 +28,12 @@ def set_cart_coords(graph, originCoord = None):
 	longCoords = [coord[1] for coord in get_lat_long_coords(graph)]
 
 	if originCoord:
-		originID = ox.get_nearest_node(graph, originCoord)
-		origin = (graph.node[originID]['x'], graph.node[originID]['y'],)
+		originID = None
+		origin = originCoord
 	else:
 		index = latCoords.index(min(latCoords))
 		originID = graph.nodes()[index]
-		origin = (graph.node[originID]['x'], graph.node[originID]['y'],)
+		origin = (graph.node[originID]['y'], graph.node[originID]['x'],)
 
 	print("Origin set at:", origin)
 	cartesianCoords = {}
@@ -42,8 +42,8 @@ def set_cart_coords(graph, originCoord = None):
 		if n == originID:
 			cartesianCoords.update({n : (0.0, 0.0)})
 		else:
-			xval = (graph.node[n]['x'] - origin[0])*(np.pi/180)*np.cos((graph.node[n]['y'] - origin[1])/2*np.pi/180)*earthRadius
-			yval = (graph.node[n]['y'] - origin[1])*np.pi/180*earthRadius
+			xval = (graph.node[n]['x'] - origin[1])*(np.pi/180)*np.cos((graph.node[n]['y'] - origin[0])/2*np.pi/180)*earthRadius
+			yval = (graph.node[n]['y'] - origin[0])*np.pi/180*earthRadius
 			cartesianCoords.update({n: (xval, yval)})
 
 	nx.set_node_attributes(graph, 'cartesian_coords', cartesianCoords)
