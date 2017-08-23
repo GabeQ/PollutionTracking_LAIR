@@ -68,10 +68,11 @@ class Grid2D:
 		self.route = None
 		self.start = None
 		self.end = None
-		self.timeForChild = None
+		self.numPathCells = None
+		self.direction = None
 		colDist = gridOrigin[0]
 		colCells = []
-		
+
 		for col in range(numCol):
 			rowDist = gridOrigin[1]
 			rowCells = []
