@@ -4,7 +4,6 @@
 
 __author__ = "Gabriel Quiroz"
 __copyright__ = "Copyright 2017, LAIR Project"
-
 import osmnx as ox, networkx as nx, matplotlib.cm as cm, pandas as pd, numpy as np, plotly.plotly as py, plotly.graph_objs as go
 from haversine import haversine
 
@@ -15,6 +14,8 @@ from graphRouting import *
 from kalmanFiltering import *
 from graphAndGrid import *
 from grid import *
+import sys
+sys.setrecursionlimit(5000)
 
 
 # #Claremont Graph with route from mudd to super king
@@ -43,3 +44,9 @@ Claremont = ox.graph_from_bbox(north, south, east, west, network_type = 'drive')
 set_cart_coords(Claremont, origin)
 closestNode = ox.get_nearest_node(Claremont, origin)
 streetGrid = make_grid_from_graph(Claremont, 500)
+# polMap = create_pollution_map("polMap_driving_1.txt")
+# path = cell_decomp_routing(streetGrid, polMap, Claremont.node[closestNode]['cartesian_coords'], 1000, 5, 3)
+# route = path_to_street(Claremont, path)
+# graphRouting = graphRouting(Claremont, route)
+# lat = [coord[0] for coord in get_lat_long_coords_route(Claremont, route)]
+# lon = [coord[1] for coord in get_lat_long_coords_route(Claremont, route)]
