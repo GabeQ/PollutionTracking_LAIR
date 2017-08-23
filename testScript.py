@@ -9,9 +9,9 @@ from graphAndGrid import *
 from grid import *
 import networkx as nx, random
 
-testGrid = Grid2D(4, 4, 10) #64 meters = cellLength
+testGrid = Grid2D(4, 4, 16) #64 meters = cellLength
 testGrid.connect_cells()
-startPos = (7, 10)
+startPos = (2, 2)
 vel = 4 #m/s
 missionTime = 30 #seconds
 
@@ -23,3 +23,5 @@ for i in range(60): #how many pol values we want to have
 	yPos = random.randint(testGrid.origin[1], testGrid.cellSize * testGrid.numRow)
 	polMap.append((measPol, xPos, yPos))
 #this is a change
+
+polMap = [(10000, 11, 9)]
