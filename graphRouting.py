@@ -11,7 +11,7 @@ from streetNetworkGraphing import nodeList_to_edgeList
 def graphRouting(graph, route):
 	'''Given a graph and a specific route of nodes, print directions to get from point A to point B'''
 	path = nodeList_to_edgeList(route)
-
+	prevName = None
 	for edge in path:
 		node1 = edge[0]
 		node2 = edge[1]
@@ -36,6 +36,8 @@ def graphRouting(graph, route):
 		else:
 			xdir = 'WEST'
 		if name:
-			print('Go' +' '+ ydir + ' ' + xdir + ' ' + 'on' + ' ' + name)
+			if name != prevName:
+				print('Go' +' '+ ydir + ' ' + xdir + ' ' + 'on' + ' ' + str(name))
+				prevName = name
 		else:
 			print('Turn' + ' ' + ydir + ' ' + xdir + ' ' 'at next intersection')
